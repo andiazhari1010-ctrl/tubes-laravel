@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Press Start 2P', cursive;
+  /* MENGGANTI BACKGROUND IMAGE dan WARNA TEXT DEFAULT */
+  background: url('background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #222; /* Mengubah warna teks default menjadi gelap */
+}
+
+/* === RULE BARU UNTUK LAYOUT === */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Mengatur tinggi utama di body */
+  overflow: hidden; /* Mencegah body scroll */
+}
+
+#app-container {
+  /* height: 100vh; <-- DIUBAH */
+  flex: 1; /* Mengisi ruang yang tersedia */
+  overflow: hidden; /* Mencegah container ini scroll */
+  display: flex; 
+}
+
+.sidebar {
+  /* Mengubah background gelap menjadi semi-transparan terang */
+  background: rgba(255, 255, 255, 0.8);
+  width: 280px;
+  min-width: 280px;
+  /* height: 100vh; <-- Hapus ini, biarkan flex-box yg mengatur */
+  padding: 1rem;
+  /* Mengubah border gelap menjadi terang */
+  border-right: 2px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+.sidebar.hidden {
+  width: 0 !important;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  border: none;
+  min-width: 0;
+}
+
+.mini-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  font-size: 0.5rem;
+  color: #333; /* Mengubah warna teks mini-month */
+  user-select:none;
+}
+.mini-month > div {
+  text-align: center;
+}
+.mini-month > .today {
+  background: #5CA2FC;
+  color: black;
+  border-radius: 100%;
+}
+
+.btn-create {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 12px 18px;
+  width: 100%;
+  margin-bottom: 1rem;
+  /* Mengubah style tombol agar cocok dengan tema terang */
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  color: #222;
+  cursor: pointer;
+}
+.btn-create:hover {
+  background: #5CA2FC;
+  color: #000;
+  border-color: #5CA2FC;
+}
+
+.calendar-header {
+  /* Mengubah background header */
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px 20px;
+  /* Mengubah border header */
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.calendar-header button,
+.view-btn {
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.7rem;
+  /* Mengubah style tombol header */
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.calendar-header button:hover,
+.view-btn.active {
+  background-color: #5CA2FC;
+  color: #000;
+  border-color: #5CA2FC;
+}
+
+#toggleSidebarBtn {
+  font-size: 1.4rem;
+  background: transparent;
+  border: none;
+  color: #333; /* Mengubah warna tombol toggle */
+  cursor: pointer;
+  padding: 0 10px;
+  user-select: none;
+}
+#toggleSidebarBtn:hover {
+  color: #5CA2FC;
+}
+
+.month-year {
+  font-size: 0.85rem;
+  font-weight: 900;
+  white-space: nowrap;
+  user-select:none;
+}
+
+.calendar-main {
+  /* Mengubah background kalender utama */
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: auto; /* Ini penting agar kalender bisa scroll jika layarnya pendek */
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* Mengubah background hari */
+  background: rgba(255, 255, 255, 0.7);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #5CA2FC; /* Warna biru tetap bagus */
+  user-select:none;
+}
+.weekdays div {
+  padding: 12px 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.1); /* Border terang */
+  font-weight: 700;
+  text-align: center;
+}
+.weekdays div:last-child {
+  border-right: none;
+}
+
+.dates-grid.month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 80px); /* Anda bisa ubah 80px jadi 'minmax(80px, 1fr)' jika mau */
+  /* Border grid terang */
+  border-right: 2px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.dates-grid.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 80px;
+  /* Border grid terang */
+  border-right: 2px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.date-cell {
+  /* Border sel terang */
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  font-size: 0.65rem;
+  position: relative;
+  /* Background sel semi-transparan */
+  background-color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.date-cell.empty {
+  background-color: transparent;
+  cursor: default;
+}
+.date-cell:hover:not(.empty) {
+  background: rgba(255, 255, 255, 0.9); /* Hover lebih terang */
+}
+.date-cell.today {
+  background-color: #5CA2FC;
+  color: #000;
+}
+
+.date-number {
+  font-weight: 900;
+  user-select: none;
+}
+
+.event {
+  margin-top: 4px;
+  background: #5CA2FC;
+  color: black;
+  font-weight: 700;
+  font-size: 0.55rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.event.dragging {
+  opacity: 0.6;
+}
+
+.modal-content {
+  font-family: 'Press Start 2P', cursive;
+  /* Mengubah modal menjadi terang */
+  background: #fff;
+  color: #222;
+  border: 3px solid #5CA2FC;
+}
+.modal-header,
+.modal-footer {
+  border-color: #5CA2FC;
+}
+.modal-title {
+  font-weight: 900;
+  font-size: 1rem;
+}
+.modal-event-item {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-event-text {
+  flex-grow: 1;
+  word-break: break-word;
+}
+.delete-event-btn {
+  background: transparent;
+  border: none;
+  color: red;
+  font-weight: 900;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.delete-event-btn:hover {
+  color: #ff6666;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none !important;
+  }
+  #app-container {
+    height: flex;
+  }
+  .calendar-main {
+    overflow-y: auto;
+  }
+}
+
+/* ===== MENU BAWAH (BARU DITAMBAHKAN) ===== */
+.bottom-menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #a5d6a7; /* Warna hijau dari dashboard */
+  padding: 15px 0;
+  border-top: 5px solid #66bb6a; /* Border hijau tua dari dashboard */
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #1b5e20; /* Teks hijau tua */
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.menu-item span {
+  font-size: 15px;
+}
+
+.menu-item:hover {
+  transform: scale(1.1);
+  transition: 0.2s;
+}

@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', cursive;
+  background: linear-gradient(#b8f2e6, #aed9e0);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Pixel-style awan */
+.cloud, .cloud.small {
+  position: absolute;
+  background: #fff;
+  border: 3px solid #cce3de;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  width: 120px;
+  height: 60px;
+  top: 100px;
+  left: 80px;
+  box-shadow: 30px 10px 0 #fff, 60px 0 0 #fff;
+  animation: floatCloud 10s linear infinite;
+}
+
+.cloud.small {
+  top: 180px;
+  left: 300px;
+  transform: scale(0.8);
+  animation-delay: 3s;
+}
+
+@keyframes floatCloud {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(30px); }
+  100% { transform: translateX(0); }
+}
+
+.login-container {
+  background: #e6fffa;
+  border: 4px solid #57cc99;
+  border-radius: 0; /* biar kelihatan pixel tegas */
+  box-shadow: 6px 6px 0 #38a3a5;
+  padding: 40px;
+  text-align: center;
+  width: 300px;
+  image-rendering: pixelated;
+}
+
+.login-container h1 {
+  color: #22577a;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 8px;
+  color: #38a3a5;
+  margin-bottom: 25px;
+}
+
+input {
+  display: block;
+  width: 220px;
+  margin: 10px auto;
+  padding: 10px;
+  border: 3px solid #80ed99;
+  background: #d8f3dc;
+  text-align: center;
+  font-size: 10px;
+  image-rendering: pixelated;
+}
+
+button {
+  background: #80ed99;
+  border: 3px solid #57cc99;
+  padding: 10px 25px;
+  font-size: 10px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #38a3a5;
+  transition: 0.15s;
+  image-rendering: pixelated;
+}
+
+button:hover {
+  background: #57cc99;
+  color: white;
+  box-shadow: 2px 2px 0 #22577a;
+}
+
+.error-msg {
+  color: red;
+  font-size: 10px;
+  margin-top: 8px;
+}

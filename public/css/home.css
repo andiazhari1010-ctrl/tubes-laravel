@@ -1,0 +1,367 @@
+home.css
+/* ===== RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== GLOBAL ===== */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  /* BACKGROUND GAMBAR */
+  background: 
+    linear-gradient(
+      rgba(0, 0, 0, 0.15), 
+      rgba(0, 0, 0, 0.15)
+    ),
+    url("home1.jpeg");
+
+  background-size: cover;       /* gambar memenuhi layar */
+  background-position: center;  /* fokus di tengah */
+  background-repeat: no-repeat; /* tidak diulang */
+
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1b1b1b;
+}
+
+
+/* ===== NAVBAR ===== */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* tidak putih lagi, hijau lembut transparan */
+  background: linear-gradient(
+    to bottom,
+    rgba(232, 245, 233, 0.95),
+    rgba(200, 230, 201, 0.8)
+  );
+  backdrop-filter: blur(10px);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  font-size: 24px;
+}
+
+.brand-text {
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.05em;
+  color: #1b5e20;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.login-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: #2e7d32;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  background: #1b5e20;
+  box-shadow: 0 6px 18px rgba(27, 94, 32, 0.55);
+}
+
+/* ===== HERO LAYOUT ===== */
+.hero {
+  flex: 1;
+  display: flex;
+  padding: 40px 50px 40px;
+  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== HERO TEXT (SINGKAT) ===== */
+.hero-text {
+  flex: 1.1;
+  max-width: 520px;
+}
+
+.hero-tagline {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 12px;                 /* sedikit lebih besar */
+  color: #1b5e20;
+  margin-bottom: 14px;
+}
+
+/* PERBESAR JUDUL KIRI */
+.hero-title {
+  font-size: 48px;                 /* sebelumnya 36px */
+  line-height: 1.22;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: #0d3111;
+}
+
+.hero-subtitle {
+  font-size: 16px;                 /* sedikit lebih besar */
+  line-height: 1.7;
+  color: #2e4d34;
+  max-width: 450px;
+}
+
+.hero-actions {
+  margin-top: 26px;
+}
+
+.cta-btn {
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 18px rgba(67, 160, 71, 0.55);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta-btn::after {
+  content: "→";
+  font-size: 16px;
+}
+
+.cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(46, 125, 50, 0.7);
+}
+
+/* ===== VISUAL: PHONE STACK ===== */
+.hero-visual {
+  flex: 0.9;
+  display: flex;
+  justify-content: center;
+}
+
+/* container visual: dibuat tidak bisa select teks, dan cursor normal */
+.phone-stack {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  user-select: none;
+  cursor: default;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* efek mengambang saat hover di area gambar */
+.phone-stack:hover {
+  transform: translateY(-10px);
+}
+
+/* Kartu ponsel dasar */
+.phone-card {
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.85);
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Kartu belakang (blur hijau) */
+.phone-back {
+  position: absolute;
+  top: 24px;
+  left: -26px;
+  transform: rotate(-8deg);
+  background: linear-gradient(145deg, #a5d6a7, #66bb6a);
+  box-shadow: 0 12px 32px rgba(27, 94, 32, 0.5);
+}
+
+.phone-front {
+  position: relative;
+  transform: rotate(3deg);
+}
+
+/* HEADER PONSEL */
+.phone-header {
+  display: flex;
+  gap: 5px;
+  padding: 9px 13px;
+  background: linear-gradient(90deg, #1b5e20, #66bb6a);
+}
+
+.phone-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c8e6c9;
+}
+
+/* BODY PONSEL: BELAKANG */
+.phone-back .phone-body {
+  padding: 18px 18px 20px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: #0d2b10;
+  background: rgba(255,255,255,0.85);
+}
+
+.pill-green {
+  font-weight: 700;
+}
+
+.pill-soft {
+  opacity: 0.9;
+}
+
+.pill.small {
+  font-size: 11px;
+}
+
+/* BODY PONSEL: DEPAN */
+.phone-front .phone-body {
+  padding: 18px 18px 20px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #1b5e20;
+  margin-bottom: 10px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #f5f5f5;
+  margin-bottom: 8px;
+}
+
+.list-item span {
+  font-size: 18px;
+}
+
+.item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b1b1b;
+}
+
+.item-sub {
+  font-size: 11px;
+  color: #616161;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 14px 18px 20px;
+  font-size: 11px;
+  color: #e8f5e9;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 960px) {
+  .hero {
+    flex-direction: column;
+    padding: 28px 22px 32px;
+    gap: 28px;
+  }
+
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: 34px;
+  }
+
+  .hero-visual {
+    width: 100%;
+  }
+
+  .phone-stack {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav {
+    padding: 12px 18px;
+  }
+
+  .hero {
+    padding: 22px 16px 28px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+}
+
+/* ===================================================
+   Opsi A — Overlay Transparan Untuk Teks Agar Jelas
+   Tanpa Mengubah Struktur CSS Lama
+   =================================================== */
+
+.home-hero-text {
+  background: rgba(0, 40, 20, 0.45);   /* hijau gelap transparan */
+  padding: 32px;
+  border-radius: 18px;
+  backdrop-filter: blur(4px);
+  color: #e9ffe9 !important;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.45);
+}
+
+.home-hero-text h1,
+.home-hero-text h2,
+.home-hero-text h3 {
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.55);
+}
+
+.home-hero-text p {
+  color: #d6f5d6 !important;
+}
