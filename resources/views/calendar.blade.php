@@ -41,8 +41,8 @@
         
             <div style="position: relative;">
                 <input type="text" id="friendNameInput" class="form-control rounded-0 mb-0" 
-                      placeholder="Type to search friend..." autocomplete="off"
-                      style="border:2px solid #1b5e20; font-family:'Poppins'; font-size:12px;">
+                      placeholder="Type friend's name..." autocomplete="off"
+                      style="border:2px solid #1b5e20; font-family:'Poppins'; font-size:12px; padding: 10px;">
                 
                 <div id="friendSuggestions" class="suggestion-box"></div>
             </div>

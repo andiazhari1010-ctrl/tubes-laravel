@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Pixel Dashboard v7.0 (Searchable Friends) Loaded! 🚀");
+    console.log("Pixel Dashboard v8.0 (Rich Suggestions) Loaded! 🚀");
 
     // ============================================
-    // 1. SEARCH BAR & ADD FRIEND
+    // 1. SEARCH BAR & ADD FRIEND (HEADER)
     // ============================================
     const searchInput = document.getElementById("searchInput");
     const searchDropdown = document.getElementById("searchDropdown");
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================
-    // 2. CALENDAR WIDGET (UPDATED WITH SEARCHABLE FRIEND)
+    // 2. CALENDAR WIDGET & MODAL
     // ============================================
     const calendarEl = document.getElementById("calendar");
     if (calendarEl) initCalendar();
@@ -135,15 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- MODAL LOGIC (UPDATED: SEARCHABLE INPUT) ---
+    // --- MODAL LOGIC (UPDATED: CUSTOM DROPDOWN SUGGESTION) ---
     const eventModal = document.getElementById('eventModal');
     
-    // Elemen Baru
-    const friendNameInput = document.getElementById('friendNameInput'); // Input Teks
-    const friendDatalist = document.getElementById('friendOptions');    // List Opsi
-    const friendIdHidden = document.getElementById('eventFriendId');    // Simpan ID
+    // Elemen Input Baru
+    const friendNameInput = document.getElementById('friendNameInput');
+    const friendSuggestions = document.getElementById('friendSuggestions'); // Div Wadah
+    const friendIdHidden = document.getElementById('eventFriendId');
 
-    // Cache daftar teman biar gak fetch berulang-ulang
+    // Cache daftar teman
     let myFriendsList = [];
 
     window.openEventModal = async (dateStr, eventData = null) => {
@@ -157,28 +157,16 @@ document.addEventListener("DOMContentLoaded", () => {
             friendNameInput.value = '';
             friendIdHidden.value = '';
             friendNameInput.disabled = false;
+            friendSuggestions.style.display = 'none'; // Sembunyikan dropdown awal
         }
 
-        // LOAD FRIENDS (Isi Datalist)
-        if(friendDatalist) {
-            try {
-                // Fetch hanya jika list masih kosong (Optimasi)
-                if(myFriendsList.length === 0) {
-                    const res = await fetch('/api/friend/list');
-                    myFriendsList = await res.json();
-                }
-
-                // Render ke Datalist
-                friendDatalist.innerHTML = '';
-                myFriendsList.forEach(f => {
-                    const opt = document.createElement('option');
-                    opt.value = f.name; // Yang muncul saat diketik
-                    // Kita simpan ID di attribute custom, nanti diambil pas user milih
-                    opt.setAttribute('data-id', f.id); 
-                    friendDatalist.appendChild(opt);
-                });
-            } catch(e) { console.error("Error loading friends", e); }
-        }
+        // LOAD FRIENDS (Simpan di memory)
+        try {
+            if(myFriendsList.length === 0) {
+                const res = await fetch('/api/friend/list');
+                myFriendsList = await res.json();
+            }
+        } catch(e) { console.error("Error loading friends", e); }
 
         if (eventData) {
             // MODE: EDIT
@@ -186,8 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('eventTitleInput').value = eventData.title;
             document.getElementById('deleteEventBtn').style.display = 'inline-block';
             document.getElementById('saveEventBtn').textContent = "UPDATE";
-            
-            // Disable collab saat edit (agar simpel)
             if(friendNameInput) friendNameInput.disabled = true; 
         } else {
             // MODE: NEW
@@ -199,32 +185,69 @@ document.addEventListener("DOMContentLoaded", () => {
         eventModal.style.display = 'block';
     }
 
-    // LOGIC PENTING: Mendapatkan ID saat user mengetik/memilih nama
+    // LOGIC 1: SAAT MENGETIK (FILTER & SHOW RICH SUGGESTIONS)
     if(friendNameInput) {
         friendNameInput.addEventListener('input', function() {
-            const val = this.value;
-            const options = friendDatalist.childNodes; // Ambil semua opsi di datalist
-            friendIdHidden.value = ''; // Reset ID dulu
-            
-            // Cari ID berdasarkan nama yang diketik user
-            // Ini looping manual karena datalist native tidak menyimpan value ID secara langsung
-            for (let i = 0; i < options.length; i++) {
-                if (options[i].value === val) {
-                    friendIdHidden.value = options[i].getAttribute('data-id');
-                    break;
-                }
+            const val = this.value.toLowerCase().trim();
+            friendSuggestions.innerHTML = '';
+            friendIdHidden.value = ''; 
+
+            if (val.length === 0) {
+                friendSuggestions.style.display = 'none';
+                return;
+            }
+
+            // Filter Teman
+            const matches = myFriendsList.filter(f => f.name.toLowerCase().includes(val));
+
+            if (matches.length > 0) {
+                matches.forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    
+                    // RENDER HTML YANG KAYA (Avatar + Nama + Email + Tombol)
+                    div.innerHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="suggestion-avatar">
+                                ${f.name[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size:12px;">${f.name}</div>
+                                <div class="text-muted" style="font-size:9px;">${f.email}</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-success badge-pixel rounded-0">SELECT</span>
+                    `;
+                    
+                    // Saat Item Diklik
+                    div.addEventListener('click', () => {
+                        friendNameInput.value = f.name; // Isi input dengan nama
+                        friendIdHidden.value = f.id;    // Simpan ID
+                        friendSuggestions.style.display = 'none'; // Tutup
+                    });
+
+                    friendSuggestions.appendChild(div);
+                });
+                friendSuggestions.style.display = 'block';
+            } else {
+                friendSuggestions.innerHTML = '<div style="padding:15px; color:#777; font-size:10px; text-align:center; font-style:italic;">User not found in friend list.</div>';
+                friendSuggestions.style.display = 'block';
+            }
+        });
+
+        // LOGIC 2: KLIK DI LUAR UNTUK MENUTUP DROPDOWN
+        document.addEventListener('click', function(e) {
+            if (!friendNameInput.contains(e.target) && !friendSuggestions.contains(e.target)) {
+                friendSuggestions.style.display = 'none';
             }
         });
     }
 
-    // BUTTON SAVE (UPDATED: Ambil ID dari Hidden Input)
+    // BUTTON SAVE
     document.getElementById('saveEventBtn')?.addEventListener('click', async () => {
         const title = document.getElementById('eventTitleInput').value;
         const dateVal = document.getElementById('eventDateInput').value;
-        
-        // Ambil ID teman dari hidden input (BUKAN dari text input)
         const friendId = friendIdHidden ? friendIdHidden.value : null; 
-        
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
         if(!title) return alert("Enter agenda title!");
@@ -299,7 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const res = await fetch('/api/notifications');
                 const data = await res.json();
                 
-                // Update Badge
                 const unreadCount = data.filter(n => !n.is_read).length;
                 if(notifBadge) {
                     notifBadge.innerText = unreadCount;
@@ -308,7 +330,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if(onlyCount) return;
 
-                // Render List
                 notifBox.innerHTML = '';
                 if(data.length === 0) { 
                     notifBox.innerHTML = '<div style="padding:10px; font-size:12px; color:#888;">No notifications.</div>'; 
@@ -317,7 +338,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         const item = document.createElement('div');
                         item.style.cssText = `padding:10px; border-bottom:1px solid #eee; cursor:pointer; background:${n.is_read ? '#fff' : '#e8f5e9'};`;
                         
-                        // CEK TIPE NOTIFIKASI
                         if (n.type === 'invite') {
                             item.innerHTML = `
                                 <div style="font-weight:bold; font-size:11px; color:#1565c0;">📩 ${n.title}</div>
@@ -350,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch(e) { console.error(e); }
         }
 
-        // FUNGSI RESPON UNDANGAN
         window.respondInvite = async (id, action) => {
             const token = document.querySelector('meta[name="csrf-token"]')?.content;
             if(!confirm(action === 'accept' ? "Terima undangan kegiatan?" : "Tolak undangan?")) return;

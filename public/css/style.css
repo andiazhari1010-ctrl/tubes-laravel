@@ -277,18 +277,19 @@ body {
     box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
 }
 
-/* ===== STYLE BARU: DROPDOWN SUGGESTION TEMAN ===== */
+/* ===== STYLE BARU: DROPDOWN SUGGESTION TEMAN (MIRIP HEADER) ===== */
 .suggestion-box {
     position: absolute;
     width: 100%;
     background: #fff;
-    border: 4px solid #1b5e20;
-    max-height: 150px;
+    border: 4px solid #1b5e20; /* Border tebal hijau ala Pixel */
+    max-height: 200px;
     overflow-y: auto;
-    z-index: 10000; /* Di atas modal */
+    z-index: 10000; 
     display: none;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2); /* Shadow Pixel */
     text-align: left;
+    margin-top: 5px;
 }
 
 .suggestion-item {
@@ -298,12 +299,30 @@ body {
     font-family: 'Poppins', sans-serif;
     font-size: 12px;
     color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Biar nama di kiri, tombol di kanan */
+    transition: 0.2s;
 }
 
 .suggestion-item:hover {
     background-color: #e8f5e9;
-    color: #1b5e20;
-    font-weight: bold;
 }
 
-.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Style untuk Avatar di dalam Suggestion */
+.suggestion-avatar {
+    width: 35px; 
+    height: 35px; 
+    background: #1b5e20; 
+    color: white; 
+    border-radius: 50%; 
+    font-size: 12px; 
+    font-weight: bold; 
+    display: grid; 
+    place-items: center;
+    border: 2px solid #000;
+}
