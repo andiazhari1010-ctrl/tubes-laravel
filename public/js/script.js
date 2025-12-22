@@ -5,20 +5,23 @@
 // 1. NAVIGASI MENU BAWAH
 document.querySelectorAll(".menu-item").forEach((item) => {
   item.addEventListener("click", (e) => {
-    e.preventDefault();
-    // Mengambil href dari blade (yang sudah format {{ url(...) }})
-    window.location.href = item.getAttribute("href");
+    // Biarkan default behavior <a> jalan, kecuali mau animasi transisi khusus
+    // e.preventDefault(); 
+    // window.location.href = item.getAttribute("href");
   });
 });
 
-// 2. TOMBOL ADD FRIEND (Header)
-const addFriendBtn = document.getElementById("addFriendBtn");
-if (addFriendBtn) {
-  addFriendBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.location.href = "/add-friend"; // Ubah ke route Laravel
-  });
-}
+// 2. TOMBOL ADD FRIEND (Header) & ICON LAINNYA
+// Pastikan tombol header mengarah ke link href-nya masing-masing
+const iconLinks = document.querySelectorAll(".icon-box");
+iconLinks.forEach(icon => {
+    icon.addEventListener("click", (e) => {
+        const href = icon.getAttribute("href");
+        if(href && href !== "#") {
+            window.location.href = href;
+        }
+    });
+});
 
 // 3. INTERAKSI AVATAR (Animasi)
 const avatarBox = document.querySelector(".avatar-box");
@@ -52,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------
   // A. FITUR LOGOUT (POPUP)
   // ---------------------------------------------------
-  const logoutIcon = document.getElementById("logoutBtn"); // Sesuai ID di Blade
+  const logoutIcon = document.getElementById("logoutBtn"); 
   const popup = document.getElementById("logoutPopup");
-  const logoutYes = document.getElementById("logoutYes");
+  const logoutYes = document.getElementById("logoutYes"); // Ini skrg <a> href, jadi aman
   const logoutCancel = document.getElementById("logoutCancel");
 
   if (logoutIcon && popup) {
@@ -67,14 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutCancel.addEventListener("click", () => {
       popup.classList.add("hidden");
     });
-
-    // Yes Logout
-    logoutYes.addEventListener("click", () => {
-      // Hapus data dummy localStorage (opsional)
-      localStorage.removeItem("loggedInUsername");
-
-      // Redirect ke Route Logout Laravel
-      window.location.href = "/logout"; 
+    
+    // Klik area gelap untuk tutup
+    popup.addEventListener("click", (e) => {
+        if(e.target === popup) popup.classList.add("hidden");
     });
   }
 
@@ -85,105 +84,181 @@ document.addEventListener("DOMContentLoaded", () => {
   if (clockElement) {
     function updateClock() {
       const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      clockElement.textContent = `${hours} : ${minutes}`;
+      // Format HH:MM:SS
+      const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+      clockElement.textContent = timeString;
     }
     updateClock();
     setInterval(updateClock, 1000);
   }
 
   // ---------------------------------------------------
-  // C. KALENDER MINI WIDGET
+  // C. KALENDER WIDGET (LOGIKA BARU - GRID SYSTEM)
   // ---------------------------------------------------
-  const calendarElement = document.getElementById("calendar");
-  if (calendarElement) {
-    function renderCalendar() {
-      const now = new Date();
-      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-      calendarElement.innerHTML = `<strong>${dateStr}</strong>`;
-    }
-    renderCalendar();
-  }
-
-  
-
-  // ---------------------------------------------------
-  // D. SEARCH BAR FEATURE (Routing Fixed)
-  // ---------------------------------------------------
-  const searchBar = document.querySelector(".search-bar");
-  const searchHistoryList = document.getElementById("searchHistory");
-
-  if (searchBar) {
-    // Render History saat load
-    let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+  const calendarEl = document.getElementById("calendar");
+  if (calendarEl) {
+    const date = new Date();
+    const currentMonth = date.getMonth();
+    const currentYear = date.getFullYear();
     
-    // Fungsi Render History ke UI
-    const renderHistory = () => {
-      if(!searchHistoryList) return;
-      searchHistoryList.innerHTML = "";
-      history.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item;
-        // Klik history item -> langsung search/isi value
-        li.addEventListener("click", () => {
-          searchBar.value = item;
-          // Trigger enter manual atau biarkan user tekan enter
-        });
-        searchHistoryList.appendChild(li);
-      });
-    };
-    renderHistory();
+    // Nama Bulan Kapital (Pixel Style)
+    const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    
+    // 1. Render Header & Grid Container
+    calendarEl.innerHTML = `
+        <div class="calendar-header">
+            <span>${monthNames[currentMonth]} ${currentYear}</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="calendar-day-name">S</div>
+            <div class="calendar-day-name">M</div>
+            <div class="calendar-day-name">T</div>
+            <div class="calendar-day-name">W</div>
+            <div class="calendar-day-name">T</div>
+            <div class="calendar-day-name">F</div>
+            <div class="calendar-day-name">S</div>
+        </div>
+    `;
 
-    // Event Listener Enter Key
-    searchBar.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const query = searchBar.value.toLowerCase().trim();
-        if (!query) return;
+    const grid = document.getElementById('calendarGrid');
+    
+    // 2. Hitung hari pertama bulan ini (0-6)
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    // 3. Hitung total hari bulan ini (28/30/31)
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    // 4. Render Kotak Kosong (Padding Awal)
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.classList.add('calendar-day', 'empty');
+        grid.appendChild(emptyCell);
+    }
 
-        // Simpan ke localStorage
-        // Hapus jika duplikat biar rapi
-        history = history.filter(item => item !== query); 
-        history.unshift(query);
-        history = history.slice(0, 5); // Max 5 item
-        localStorage.setItem("searchHistory", JSON.stringify(history));
-        renderHistory();
-
-        // LOGIKA ROUTING PENCARIAN (Updated to Laravel Routes)
-        if (query.includes("pomo") || query.includes("waktu") || query.includes("timer")) {
-          window.location.href = "/pomodoro"; // Route Laravel
-        } 
-        else if (query.includes("note") || query.includes("catat") || query.includes("tulisan")) {
-          window.location.href = "/notes"; // Route Laravel
-        } 
-        else if (query.includes("cale") || query.includes("tanggal") || query.includes("event")) {
-          window.location.href = "/calendar"; // Route Laravel
-        } 
-        else if (query.includes("friend") || query.includes("teman")) {
-            window.location.href = "/add-friend"; // Route Laravel
+    // 5. Render Tanggal 1 - Akhir
+    const todayDate = date.getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayCell = document.createElement('div');
+        dayCell.classList.add('calendar-day');
+        dayCell.textContent = i;
+        
+        // Highlight Hari Ini
+        if (i === todayDate) {
+            dayCell.classList.add('today');
         }
-        else {
-          alert("No matching feature found for: " + query);
-        }
-      }
-    });
+        grid.appendChild(dayCell);
+    }
   }
 
   // ---------------------------------------------------
-  // E. LOGIC HALAMAN NOTES (Opsional di Script Global)
+  // D. SEARCH BAR FEATURE (LOGIKA BARU - API BACKEND)
   // ---------------------------------------------------
-  // Logic ini sebenarnya sudah ada di notes.js, tapi 
-  // saya biarkan di sini dengan pengecekan elemen agar tidak error di dashboard.
-  
+  const searchInput = document.getElementById("searchInput");
+  const searchHistoryList = document.getElementById("searchHistory");
+  let searchTimeout = null;
+
+  if (searchInput && searchHistoryList) {
+    
+    // Event listener saat mengetik
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        // Clear timeout lama (Debounce) biar server gak berat
+        clearTimeout(searchTimeout);
+
+        // Jika input kosong atau < 2 huruf, sembunyikan dropdown
+        if (query.length < 2) {
+            searchHistoryList.style.display = 'none';
+            searchHistoryList.innerHTML = '';
+            return;
+        }
+
+        // Tunggu 500ms setelah berhenti mengetik baru request
+        searchTimeout = setTimeout(async () => {
+            try {
+                // Fetch ke API Laravel
+                const res = await fetch(`/api/search?q=${query}`);
+                
+                if (res.ok) {
+                    const users = await res.json();
+                    renderSearchResults(users);
+                }
+            } catch (error) {
+                console.error("Search error:", error);
+            }
+        }, 500);
+    });
+
+    // Sembunyikan dropdown kalau klik di luar area search
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchHistoryList.contains(e.target)) {
+            searchHistoryList.style.display = 'none';
+        }
+    });
+
+    // Fungsi Render Hasil ke Dropdown
+    function renderSearchResults(users) {
+        searchHistoryList.innerHTML = '';
+        
+        if (users.length === 0) {
+            const li = document.createElement('li');
+            li.style.padding = '10px';
+            li.style.color = '#999';
+            li.style.fontSize = '12px';
+            li.textContent = 'No user found.';
+            searchHistoryList.appendChild(li);
+        } else {
+            users.forEach(user => {
+                const initial = user.name.charAt(0).toUpperCase();
+                
+                // Buat Item List sebagai Link
+                const a = document.createElement('a');
+                a.href = '#'; // Nanti arahkan ke profile/add friend
+                a.classList.add('search-item');
+                // Style inline untuk layout baris
+                a.style.display = 'flex'; 
+                a.style.alignItems = 'center';
+                a.style.padding = '10px';
+                a.style.textDecoration = 'none';
+                a.style.color = '#333';
+                a.style.borderBottom = '1px solid #eee';
+                
+                a.innerHTML = `
+                    <div style="width:30px; height:30px; background:${getRandomColor()}; border-radius:50%; margin-right:10px; display:flex; justify-content:center; align-items:center; color:white; font-weight:bold; font-size:12px;">
+                        ${initial}
+                    </div>
+                    <span>${user.name}</span>
+                `;
+                
+                // Klik user -> bisa diarahkan ke Add Friend nanti
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert(`Selected user: ${user.name} (ID: ${user.id}) \nFitur Add Friend akan segera hadir!`);
+                    searchInput.value = user.name;
+                    searchHistoryList.style.display = 'none';
+                });
+
+                const li = document.createElement('li');
+                li.style.listStyle = 'none'; // Pastikan list style hilang
+                li.appendChild(a);
+                searchHistoryList.appendChild(li);
+            });
+        }
+        searchHistoryList.style.display = 'block';
+    }
+
+    // Helper warna acak untuk avatar
+    function getRandomColor() {
+        const colors = ['#ef5350', '#66bb6a', '#42a5f5', '#ffca28', '#ab47bc', '#8d6e63'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+  }
+
+  // ---------------------------------------------------
+  // E. LOGIC HALAMAN NOTES (Opsional)
+  // ---------------------------------------------------
   const noteContent = document.getElementById("noteContent");
-  const saveNoteBtn = document.getElementById("saveNoteBtn");
-  
-  if (noteContent && saveNoteBtn) {
-    // Logic notes hanya jalan jika elemennya ada (artinya sedang di halaman Notes)
-    // ... (Kode logic notes diserahkan ke notes.js agar tidak duplikat) ...
-    console.log("Notes page detected."); 
+  if (noteContent) {
+    console.log("Notes page active."); 
   }
 
 });

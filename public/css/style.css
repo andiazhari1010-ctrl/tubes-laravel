@@ -1,43 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Press Start 2P", monospace;
 }
 
 body {
-  background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+  font-family: 'Press Start 2P', cursive;
+  /* Ganti Background Image sesuai file kamu */
+  background: url('../images/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  /* Fallback color kalau gambar gagal load */
+  background-color: #e8f5e9;
+  
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100vh;
   overflow: hidden;
-  
-  /* PERBAIKAN PATH GAMBAR UNTUK LARAVEL */
-  background: url("../images/background.jpg") no-repeat center center fixed;
-  background-size: cover;
+  color: #1b5e20;
 }
 
-/* ===== TOP BAR ===== */
+/* ===== TOP BAR (HEADER) ===== */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
-  /* Supaya elemen absolute di dalamnya (icon) punya patokan */
-  position: relative; 
+  padding: 15px 20px;
+  position: relative;
+  z-index: 500; /* PENTING: Supaya tombol bisa diklik */
+  background: rgba(0, 0, 0, 0.1); /* Sedikit gelap biar kontras */
+  height: 80px;
 }
 
+/* Icon Box Style */
 .icon-box {
   background: #ffffffb3;
   border: 3px solid #66bb6a;
-  border-radius: 50%;
-  padding: 10px 14px;
-  font-size: 28px;
+  border-radius: 50%; /* Bulat */
+  width: 50px; height: 50px;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 20px;
+  text-decoration: none;
+  color: #000;
   transition: 0.3s;
   cursor: pointer;
-  text-decoration: none; /* Hilangkan garis bawah link */
-  color: #000;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .icon-box:hover {
@@ -45,78 +55,165 @@ body {
   background: #c8e6c9;
 }
 
-/* ===== DASHBOARD ===== */
+/* Tombol Logout (Spesifik) */
+.logout-icon {
+  background: #ffcccc;
+  border-color: #ef5350;
+  color: #c62828;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin: 0 20px;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 15px;
+  border: 3px solid #0f5132;
+  border-radius: 25px;
+  font-family: 'Poppins', sans-serif; /* Font biasa buat input biar kebaca */
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f5132;
+  outline: none;
+  box-shadow: 0 0 10px rgba(102, 187, 106, 0.5);
+}
+
+.search-history {
+  list-style: none;
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border: 2px solid #0f5132;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 600;
+  display: none;
+}
+.search-history:not(:empty) { display: block; }
+
+.search-history li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 12px;
+  text-align: left;
+}
+.search-history li:hover { background: #e8f5e9; }
+
+
+/* ===== DASHBOARD MAIN ===== */
 .dashboard {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  width: 100%;
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.welcome-text {
+  font-size: 24px;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px #fff;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .avatar-box {
   background: #ffffffb3;
   border: 6px solid #66bb6a;
   border-radius: 50%;
-  padding: 30px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  transition: 0.3s ease;
+  padding: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  width: 180px; height: 180px;
+  display: flex; justify-content: center; align-items: center;
+  overflow: hidden;
 }
 
 .avatar {
-  width: 160px;
-  height: 160px;
+  width: 100%; height: 100%;
+  object-fit: cover;
   border-radius: 50%;
 }
 
-/* ANIMASI MELAYANG */
+/* Animasi Melayang */
+.floating { animation: floatUpDown 3s ease-in-out infinite; }
 @keyframes floatUpDown {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
-.floating {
-  animation: floatUpDown 3s ease-in-out infinite;
-}
 
-/* ===== LOVE ANIMATION ===== */
+/* Hiasan Hati */
 .heart {
   position: absolute;
-  font-size: 30px;
-  opacity: 0.8;
-  animation: floatHeart 3s infinite ease-in-out;
-  color: #1b5e20;
-  top: 48%; /* Override dari style umum */
+  font-size: 40px;
+  top: 50%;
   transform: translateY(-50%);
+  animation: floatHeart 2s infinite ease-in-out;
+  color: #2e7d32;
+  z-index: 1;
 }
-
-#heartLeft {
-  left: calc(50% - 170px);
-  top: 50%;
-  animation-delay: 0s;
-  transform: translateY(-50%) scale(1.2);
-}
-
-#heartRight {
-  right: calc(50% - 170px);
-  top: 50%;
-  animation-delay: 1.5s;
-  transform: translateY(-50%) scale(1.2);
-}
+#heartLeft { left: 20%; }
+#heartRight { right: 20%; }
 
 @keyframes floatHeart {
-  0% { transform: translateY(10px) scale(1); opacity: 0.8; }
-  50% { transform: translateY(-20px) scale(1.3); opacity: 1; }
-  100% { transform: translateY(10px) scale(1); opacity: 0.8; }
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-60%) scale(1.2); }
 }
 
-/* ===== MENU BAWAH ===== */
+/* JAM DIGITAL */
+.top-clock {
+  position: absolute;
+  top: 100px;
+  right: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #66bb6a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* KALENDER WIDGET (Placeholder) */
+.calendar-widget {
+  position: absolute;
+  bottom: 20px; left: 20px;
+  background: rgba(255,255,255,0.8);
+  border: 3px solid #66bb6a;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+/* ===== BOTTOM MENU ===== */
 .bottom-menu {
   display: flex;
   justify-content: space-around;
   align-items: center;
   background: #a5d6a7;
-  padding: 15px 0;
+  padding: 12px 0;
   border-top: 5px solid #66bb6a;
+  z-index: 400;
 }
 
 .menu-item {
@@ -125,379 +222,168 @@ body {
   align-items: center;
   text-decoration: none;
   color: #1b5e20;
-  font-size: 21px;
-  font-weight: 900;
+  font-size: 20px;
+  transition: 0.2s;
 }
 
 .menu-item span {
-  font-size: 15px;
+  font-size: 10px;
+  margin-top: 5px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
 }
 
-.menu-item:hover {
-  transform: scale(1.1);
-  transition: 0.2s;
-}
-
-/* ===== HALAMAN INFO ===== */
-.info-page {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 60px 40px;
-  color: #1b5e20;
-  overflow-y: auto;
-  text-align: center;
-  
-  /* PERBAIKAN PATH GAMBAR */
-  background: url("../images/background.jpg") no-repeat center center fixed;
-  background-size: cover; /* Tambahkan ini agar responsif */
-  
-  position: relative;
-}
-
-/* Judul */
-.info-title {
-  font-size: 26px;
-  margin-bottom: 25px;
-  color: #1b5e20;
-  text-shadow: 2px 2px #a5d6a7;
-}
-
-/* Kartu Informasi */
-.info-card {
-  background: #ffffffb3;
-  border: 3px solid #66bb6a;
-  border-radius: 25px;
-  padding: 20px;
-  width: 90%;
-  max-width: 650px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  line-height: 1.6;
-  margin-bottom: 25px;
-}
-
-.info-card h2, .info-card h3 {
-  color: #2e7d32;
-  margin-bottom: 10px;
-}
-
-.member-list {
-  list-style: none;
-  padding-left: 0;
-  margin-bottom: 15px;
-}
-
-.member-list li {
-  background: #e8f5e9;
-  border: 1px solid #a5d6a7;
-  border-radius: 10px;
-  padding: 6px 12px;
-  margin-bottom: 6px;
-  transition: 0.2s;
-}
-
-.member-list li:hover {
-  background: #c8e6c9;
-  transform: scale(1.05);
-}
-
-.program-info {
-  margin: 10px 0;
-  font-size: 14px;
-  text-align: center;
-}
-
-.info-card p {
-  text-align: justify;
-  margin-bottom: 10px;
-}
-
-/* ===== ANIMASI MASUK ===== */
-@keyframes slideFromLeft {
-  0% { opacity: 0; transform: translateX(-40px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideFromRight {
-  0% { opacity: 0; transform: translateX(40px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeDown {
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.animate-left { animation: slideFromLeft 1s ease-out; }
-.animate-right { animation: slideFromRight 1s ease-out; }
-.animate-slide { animation: fadeDown 1.2s ease-out; }
-
-/* ===== HALAMAN NOTES (Shared Styles) ===== */
-.notes-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 15px 25px;
-  gap: 15px;
-  overflow-y: auto;
-}
-
-.note-textarea {
-  width: 100%;
-  height: 200px;
-  padding: 15px;
-  border: 3px solid #66bb6a;
-  border-radius: 15px;
-  font-family: monospace; 
-  font-size: 14px;
-  resize: vertical;
-}
-
-.notes-list-container {
-  color: #1b5e20;
-  margin-top: 10px;
-}
-
-.notes-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
-}
-
-.note-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #ffffffb3;
-  border: 2px solid #a5d6a7;
-  border-radius: 10px;
-  padding: 12px 15px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.note-item:hover {
-  background: #c8e6c9;
-}
-
-.note-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  margin-left: 5px;
-  padding: 2px;
-}
-
-/* ===== SEARCH BAR DI TOP BAR ===== */
-.search-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  position: relative; /* Untuk dropdown history */
-}
-
-.search-bar {
-  width: 85%;
-  max-width: 600px;
-  padding: 16px 12px;
-  border: 3px solid #0f5132;
-  border-radius: 23px;
-  font-size: 13px;
-  background: rgba(255, 255, 255, 0.85);
-  color: #0f5132;
-  outline: none;
-  box-shadow: 0 0 12px #b5e48c;
-  backdrop-filter: blur(6px);
-}
-
-.search-bar::placeholder {
-  color: #198754;
-}
-
-/* History List Dropdown */
-.search-history {
-  list-style: none;
-  position: absolute;
-  top: 50px;
-  width: 85%;
-  max-width: 600px;
-  background: white;
-  border: 2px solid #0f5132;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 100;
-  display: none; /* Default hidden, muncul lewat JS kalo ada isi */
-}
-
-.search-history:not(:empty) {
-  display: block;
-}
-
-.search-history li {
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  cursor: pointer;
-  color: #333;
-  font-family: sans-serif;
-  font-size: 12px;
-  text-align: left;
-}
-
-.search-history li:hover {
-  background: #e8f5e9;
-}
+.menu-item:hover { transform: scale(1.1); }
+.menu-item.active { color: #000; font-weight: 900; }
 
 
-/* ===== WIDGETS ===== */
-.widget {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.8);
-  border: 3px solid #66bb6a;
-  border-radius: 15px;
-  padding: 10px 15px;
-  color: #1b5e20;
-  font-family: monospace;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Kalender kecil di kiri bawah */
-.calendar-widget {
-  bottom: 120px;
-  left: 50px;
-  font-size: 15px;
-}
-
-/* ===== TEKS WELCOME ===== */
-.welcome-text {
-  color: #1b5e20;
-  font-size: 40px;
-  text-align: center;
-  margin-bottom: 50px;
-  text-shadow: 2px 2px #c8e6c9;
-}
-
-/* ===== AVATAR SECTION ===== */
-.avatar-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ===== JAM DI BAWAH IKON PROFIL ===== */
-.top-clock {
-  position: absolute;
-  top: 100px; /* di bawah top bar */
-  right: 30px; /* sejajar kanan dengan ikon profil */
-  font-size: 22px;
-  font-weight: bold;
-  background: rgba(255, 255, 255, 0.85);
-  border: 3px solid #66bb6a;
-  border-radius: 10px;
-  padding: 8px 14px;
-  color: #1b5e20;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* ===== POSISI KHUSUS IKON (ABSOLUTE) ===== */
-
-/* Jadikan kedua ikon absolute agar bisa diatur posisinya bebas */
-.top-bar .icon-box {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Add Friend di kiri (sedikit masuk ke tengah) */
-.top-bar .icon-box[title="Add Friend"] {
-  right: 100px;
-}
-
-/* Notifications di sebelah kanan Add Friend */
-.top-bar .icon-box[title="Notifications"] {
-  right: 20px;
-}
-
-/* LOGOUT ICON */
-.logout-icon {
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* ===== POPUP LOGOUT ===== */
-.logout-popup.hidden {
-  display: none;
-}
-
+/* ===== LOGOUT POPUP ===== */
 .logout-popup {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
   z-index: 9999;
 }
+.logout-popup.hidden { display: none; }
 
 .popup-box {
-  background: #ffffffd9;
-  padding: 25px 35px;
-  border-radius: 14px;
+  background: #fff;
+  padding: 30px;
+  border: 4px solid #66bb6a;
+  border-radius: 15px;
   width: 320px;
   text-align: center;
-  border: 3px solid #66bb6a;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
 .popup-box h3 {
-  margin-bottom: 8px;
-  font-size: 22px;
-  color: #1b5e20;
+  margin-top: 0;
+  color: #b9534c;
+  margin-bottom: 10px;
+  font-size: 20px;
 }
 
 .popup-box p {
-  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif;
   font-size: 14px;
-  color: #2e7d32;
+  margin-bottom: 25px;
+  color: #333;
 }
 
-.popup-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
+.popup-actions { display: flex; gap: 10px; justify-content: center; }
 
 .popup-btn {
-  flex: 1;
-  padding: 10px 0;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
   cursor: pointer;
-  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .popup-btn.yes {
-  background: #d32f2f;
-  color: white;
+  background: #ffcccc;
+  color: #c62828;
+  border: 2px solid #ef5350;
 }
-
-.popup-btn.yes:hover {
-  background: #b71c1c;
-}
+.popup-btn.yes:hover { background: #ffcdd2; }
 
 .popup-btn.cancel {
-  background: #66bb6a;
-  color: #fff;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 2px solid #66bb6a;
+}
+.popup-btn.cancel:hover { background: #c8e6c9; }
+
+
+/* ===== RESPONSIVE MOBILE ===== */
+@media (max-width: 600px) {
+  .welcome-text { font-size: 16px; }
+  .avatar-box { width: 140px; height: 140px; }
+  .icon-box { width: 40px; height: 40px; font-size: 16px; }
+  .search-container { margin: 0 10px; }
+  .search-bar { font-size: 12px; padding: 8px; }
+  .top-clock { top: 80px; font-size: 14px; }
+  
+  /* Sembunyikan elemen hiasan di HP biar gak penuh */
+  .heart, .calendar-widget { display: none; }
+  
+  .menu-item { font-size: 16px; }
+  .menu-item span { font-size: 8px; }
 }
 
-.popup-btn.cancel:hover {
-  background: #388e3c;
+/* ===== WIDGET CALENDAR (PIXEL ART STYLE) ===== */
+.calendar-widget {
+    min-width: 280px;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    /* Pastikan widget tidak tertutup elemen lain */
+    z-index: 10; 
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #1b5e20;
+    font-size: 14px;
+    font-family: 'Press Start 2P', cursive;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #66bb6a;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.calendar-day-name {
+    font-size: 10px;
+    color: #2e7d32;
+    font-weight: bold;
+    padding-bottom: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.calendar-day {
+    padding: 8px 0;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.2s;
+    font-family: monospace;
+    background-color: #f1f8e9;
+    border: 1px solid transparent;
+}
+
+.calendar-day:hover {
+    background-color: #c8e6c9;
+    border: 1px solid #66bb6a;
+}
+
+/* Hari Ini (Hijau Gelap) */
+.calendar-day.today {
+    background-color: #43a047;
+    color: white;
+    font-weight: bold;
+    border: 2px solid #1b5e20;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+    border: none;
 }

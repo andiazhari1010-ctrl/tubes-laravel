@@ -10,12 +10,11 @@ return new class extends Migration
     {
         Schema::create('pomodoro_logs', function (Blueprint $table) {
             $table->id();
-            // Kita hapus user_id dulu biar simpel
-            // $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('type'); // pomodoro, shortBreak, etc
-            $table->timestamp('ended_at');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('type'); // <--- PASTIKAN INI ADA
             $table->integer('duration_seconds');
-            $table->string('status')->nullable(); // completed / skipped
+            $table->string('status');
+            $table->timestamp('ended_at');
             $table->timestamps();
         });
     }

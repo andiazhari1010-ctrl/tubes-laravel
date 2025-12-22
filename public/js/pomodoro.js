@@ -1,395 +1,443 @@
-// ==========================================
-// KONFIGURASI PATH & ASET
-// ==========================================
-const backgrounds = {
-  pomodoro: '/images/pxl-bg.jpg',
-  shortBreak: '/images/aft-bg.png',
-  longBreak: '/images/night.jpg'
-};
+document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // 1. CONFIG & IMAGES
+    // ==========================================
+    let settings = JSON.parse(localStorage.getItem('pomo_settings')) || {
+        pomodoro: 20, shortBreak: 10, longBreak: 15,
+        longBreakInterval: 4, autoStartBreak: false, autoStartPomo: false
+    };
 
-// Durations default
-let durations = {
-  pomodoro: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60
-};
+    if(document.getElementById('set-pomo')) {
+        document.getElementById('set-pomo').value = settings.pomodoro;
+        document.getElementById('set-short').value = settings.shortBreak;
+        document.getElementById('set-long').value = settings.longBreak;
+        document.getElementById('set-interval').value = settings.longBreakInterval;
+        document.getElementById('set-auto-break').checked = settings.autoStartBreak;
+        document.getElementById('set-auto-pomo').checked = settings.autoStartPomo;
+    }
 
-// Elements
-const app = document.getElementById('app'); 
-const pomodoroBtn = document.getElementById('pomodoroBtn');
-const shortBreakBtn = document.getElementById('shortBreakBtn');
-const longBreakBtn = document.getElementById('longBreakBtn');
-const timerDisplay = document.getElementById('timer');
-const sessionCounterDisplay = document.getElementById('session-counter'); 
-const startStopBtn = document.getElementById('startStopBtn');
-const skipBtn = document.getElementById('skipBtn');
-const resetBtn = document.getElementById('resetBtn'); 
+    const durations = {
+        pomodoro: parseInt(settings.pomodoro),
+        shortBreak: parseInt(settings.shortBreak),
+        longBreak: parseInt(settings.longBreak)
+    };
 
-// Audio
-const originalTitle = document.title; 
-const soundClick = new Audio('/audio/start.mp3'); 
-const soundFinish = new Audio('/audio/finish.mp3');
-soundClick.preload = 'auto';
-soundFinish.preload = 'auto';
-
-function playSound(audioElement) {
-  audioElement.currentTime = 0; 
-  audioElement.play().catch(e => console.error("Gagal memutar suara:", e));
-}
-
-// ==========================================
-// STATE MANAGEMENT (MODIFIKASI UTAMA)
-// ==========================================
-let currentMode = localStorage.getItem('pomo_mode') || 'pomodoro';
-let timeLeft = durations[currentMode]; // Sementara, nanti diupdate fetchConfig
-let timerInterval = null;
-let running = false;
-let endTime = null; 
-let pomodoroCount = parseInt(localStorage.getItem('pomo_count')) || 0;
-let shortBreakCount = parseInt(localStorage.getItem('pomo_sb_count')) || 0;
-
-// ==========================================
-// FUNGSI SIMPAN & MUAT (LOCAL STORAGE)
-// ==========================================
-
-// Simpan status saat ini ke browser
-function saveState() {
-    localStorage.setItem('pomo_mode', currentMode);
-    localStorage.setItem('pomo_count', pomodoroCount);
-    localStorage.setItem('pomo_sb_count', shortBreakCount);
-    localStorage.setItem('pomo_running', running);
+    const backgrounds = { pomodoro: '/images/pxl-bg.jpg', shortBreak: '/images/aft-bg.png', longBreak: '/images/night.jpg' };
     
-    if (running && endTime) {
-        localStorage.setItem('pomo_endTime', endTime);
-    } else {
-        localStorage.removeItem('pomo_endTime');
-        localStorage.setItem('pomo_timeLeft', timeLeft); // Simpan sisa waktu jika pause
+    // === FITUR 5: CHARACTER IMAGES ===
+    const charImages = {
+        pomodoro: '/images/char-focus.gif',   // Ganti dengan file kamu
+        shortBreak: '/images/char-break.gif', // Ganti dengan file kamu
+        longBreak: '/images/char-sleep.gif'   // Ganti dengan file kamu
+    };
+
+    const soundClick = new Audio('/audio/start.mp3'); 
+    const soundFinish = new Audio('/audio/finish.mp3');
+
+    const app = document.getElementById('app');
+    const timerDisplay = document.getElementById('timer');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const charElement = document.getElementById('pomo-character');
+    
+    const statSecondsDisplay = document.getElementById('stat-seconds');
+    const statSessionsDisplay = document.getElementById('stat-sessions');
+
+    let currentMode = localStorage.getItem('pomo_mode') || 'pomodoro';
+    let isRunning = localStorage.getItem('pomo_isRunning') === 'true';
+    let timer = null;
+    let dbTotalSeconds = 0; 
+    let dbTotalSessions = 0;
+    let activityChart = null;
+
+    if (!['pomodoro', 'shortBreak', 'longBreak'].includes(currentMode)) currentMode = 'pomodoro';
+
+    // ==========================================
+    // 2. FITUR 3: CUSTOM TOAST (PENGGANTI ALERT)
+    // ==========================================
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if(!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        // Tambahkan Ikon sesuai mood
+        let icon = '🔔';
+        if(message.includes('Selesai')) icon = '🎉';
+        if(message.includes('Istirahat')) icon = '☕';
+        if(message.includes('Gagal')) icon = '❌';
+
+        toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+        container.appendChild(toast);
+
+        // Hapus otomatis setelah 3 detik
+        setTimeout(() => {
+            toast.classList.add('hide');
+            toast.addEventListener('animationend', () => toast.remove());
+        }, 3000);
     }
-}
 
-// Cek apakah ada timer yang berjalan sebelumnya
-function loadState() {
-    const savedRunning = localStorage.getItem('pomo_running') === 'true';
-    const savedEndTime = localStorage.getItem('pomo_endTime');
-    const savedTimeLeft = localStorage.getItem('pomo_timeLeft');
+    // ==========================================
+    // 3. UI ENHANCEMENT: CYCLE TRACKER
+    // ==========================================
+    let dotsContainer = document.getElementById('cycle-dots');
+    if (!dotsContainer && timerDisplay) {
+        dotsContainer = document.createElement('div');
+        dotsContainer.id = 'cycle-dots';
+        dotsContainer.style.display = 'flex';
+        dotsContainer.style.gap = '8px';
+        dotsContainer.style.justifyContent = 'center';
+        dotsContainer.style.marginBottom = '20px';
+        timerDisplay.after(dotsContainer); 
+    }
 
-    // Update tampilan counter
-    updateCounterDisplay();
-    updateActiveButton();
-    updateBackground();
+    function renderCycleDots() {
+        if(!dotsContainer) return;
+        dotsContainer.innerHTML = ''; 
+        const interval = parseInt(settings.longBreakInterval) || 4;
+        const cycleCount = parseInt(localStorage.getItem('pomo_cycleCount')) || 0;
+        const currentPos = cycleCount % interval; 
 
-    if (savedRunning && savedEndTime) {
-        // KASUS 1: Timer ditinggal jalan (Pindah Tab/Close Browser)
-        const now = Date.now();
-        const remaining = Math.ceil((parseInt(savedEndTime) - now) / 1000);
-
-        if (remaining > 0) {
-            // Timer masih ada sisa waktu -> LANJUTKAN
-            console.log("Melanjutkan timer dari storage...");
-            timeLeft = remaining;
-            endTime = parseInt(savedEndTime); // Restore endTime
-            running = true;
-            startTimer(true); // True artinya "Restore Mode"
-        } else {
-            // Timer habis saat user pergi -> SELESAIKAN
-            console.log("Timer selesai saat Anda pergi.");
-            timeLeft = 0;
-            finishSession(true); // True = tanpa suara (karena mungkin user baru buka)
+        for(let i = 0; i < interval; i++) {
+            const dot = document.createElement('span');
+            dot.style.width = '12px'; dot.style.height = '12px';
+            dot.style.border = '2px solid white'; dot.style.borderRadius = '50%';
+            dot.style.display = 'inline-block'; dot.style.transition = 'all 0.3s ease';
+            if (i < currentPos) {
+                dot.style.backgroundColor = 'white';
+                dot.style.boxShadow = '0 0 5px rgba(255,255,255,0.8)';
+            } else {
+                dot.style.backgroundColor = 'transparent'; 
+            }
+            dotsContainer.appendChild(dot);
         }
-    } else if (savedTimeLeft) {
-        // KASUS 2: Timer dalam posisi PAUSE
-        console.log("Mengembalikan posisi pause...");
-        timeLeft = parseInt(savedTimeLeft);
-        updateTimerDisplay();
-        // UI tetap dalam kondisi pause (tombol START muncul)
-        startStopBtn.textContent = 'RESUME';
-        app.classList.add('timer-paused');
     }
-}
 
-// ==========================================
-// API & INTEGRASI
-// ==========================================
+    // ==========================================
+    // 4. MODAL LOGIC
+    // ==========================================
+    if(document.getElementById('btnReport')) document.getElementById('btnReport').addEventListener('click', () => {
+        document.getElementById('modalReport').classList.remove('hidden');
+        renderChart(); 
+    });
+    if(document.getElementById('btnSetting')) document.getElementById('btnSetting').addEventListener('click', () => {
+        document.getElementById('modalSetting').classList.remove('hidden');
+    });
 
-async function fetchConfig() {
-    try {
-        const response = await fetch('/api/config');
-        if (response.ok) {
-            const data = await response.json();
-            durations.pomodoro = data.pomodoro_duration * 60;
-            durations.shortBreak = data.short_break_duration * 60;
-            durations.longBreak = data.long_break_duration * 60;
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+    window.switchTab = (tabName) => {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
+        event.target.classList.add('active');
+    };
+
+    window.saveSettings = () => {
+        const newSettings = {
+            pomodoro: document.getElementById('set-pomo').value,
+            shortBreak: document.getElementById('set-short').value,
+            longBreak: document.getElementById('set-long').value,
+            longBreakInterval: document.getElementById('set-interval').value,
+            autoStartBreak: document.getElementById('set-auto-break').checked,
+            autoStartPomo: document.getElementById('set-auto-pomo').checked
+        };
+        localStorage.setItem('pomo_settings', JSON.stringify(newSettings));
+        
+        settings = newSettings;
+        durations.pomodoro = parseInt(newSettings.pomodoro);
+        durations.shortBreak = parseInt(newSettings.shortBreak);
+        durations.longBreak = parseInt(newSettings.longBreak);
+        
+        if (!isRunning) {
+            localStorage.removeItem('pomo_targetTime');
+            localStorage.setItem('pomo_timeLeft', durations[currentMode]);
+        }
+        showToast("Settings Saved! Reloading...");
+        setTimeout(() => location.reload(), 1000);
+    };
+
+    // ==========================================
+    // 5. STATS & CHART
+    // ==========================================
+    async function fetchStatsAndReport() {
+        try {
+            const res = await fetch('/api/stats'); 
+            if(res.ok) {
+                const data = await res.json();
+                dbTotalSeconds = data.total_seconds || 0;
+                dbTotalSessions = data.total_sessions || 0;
+
+                if(statSecondsDisplay) statSecondsDisplay.textContent = dbTotalSeconds;
+                if(statSessionsDisplay) statSessionsDisplay.textContent = dbTotalSessions;
+                if(document.getElementById('rep-seconds')) document.getElementById('rep-seconds').textContent = dbTotalSeconds;
+                if(document.getElementById('rep-session-passed')) document.getElementById('rep-session-passed').textContent = dbTotalSessions;
+
+                const rankList = document.getElementById('ranking-list');
+                if(rankList) {
+                    rankList.innerHTML = '';
+                    data.ranking.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>#${index+1} ${user.name}</span> <span>${user.time}</span>`;
+                        rankList.appendChild(li);
+                    });
+                }
+                window.chartDataConfig = data.chart_data;
+                if(!document.getElementById('modalReport').classList.contains('hidden')) renderChart();
+            }
+        } catch (error) { console.log("Stats fetch error", error); }
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('activityChart');
+        if(!ctx) return;
+        if(activityChart) activityChart.destroy();
+        const dataConfig = window.chartDataConfig || [];
+        
+        activityChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: dataConfig.map(d => d.date),
+                datasets: [{
+                    label: 'Seconds', data: dataConfig.map(d => d.seconds),
+                    backgroundColor: '#b9534c', borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // ==========================================
+    // 6. TIMER LOGIC
+    // ==========================================
+    function getTimeLeft() {
+        const target = localStorage.getItem('pomo_targetTime');
+        const saved = localStorage.getItem('pomo_timeLeft');
+        if (isRunning && target) {
+            const now = Date.now();
+            const left = Math.ceil((parseInt(target) - now) / 1000);
+            return left > 0 ? left : 0;
+        }
+        if (saved) return parseInt(saved);
+        return durations[currentMode];
+    }
+
+    function updateDisplay() {
+        const left = getTimeLeft();
+        let m = Math.floor(left / 60);
+        let s = left % 60;
+        
+        if (timerDisplay) {
+            timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            document.title = isRunning ? `(${m}:${s}) Fokus...` : 'Pomodoro';
+        }
+        if (currentMode === 'pomodoro') {
+            let currentDisplay = dbTotalSeconds;
+            if (isRunning) currentDisplay += (durations.pomodoro - left);
+            if(statSecondsDisplay) statSecondsDisplay.textContent = currentDisplay;
+        }
+        renderCycleDots();
+    }
+
+    function startTimer() {
+        playSound(soundClick);
+        if (isRunning) {
+            clearInterval(timer);
+            const target = localStorage.getItem('pomo_targetTime');
+            let leftToSave = durations[currentMode];
+            if (target) {
+                leftToSave = Math.ceil((parseInt(target) - Date.now()) / 1000);
+                if (leftToSave < 0) leftToSave = 0;
+            }
+            localStorage.setItem('pomo_timeLeft', leftToSave);
+            isRunning = false;
+            localStorage.removeItem('pomo_targetTime'); 
+
+            if(startStopBtn) startStopBtn.textContent = 'RESUME';
+            app.classList.remove('timer-running'); app.classList.add('timer-paused');
+        } else {
+            isRunning = true;
+            let savedLeft = localStorage.getItem('pomo_timeLeft');
+            let currentLeft = savedLeft ? parseInt(savedLeft) : durations[currentMode];
+            localStorage.setItem('pomo_targetTime', Date.now() + (currentLeft * 1000));
             
-            // Hanya reset timeLeft jika TIDAK sedang jalan & TIDAK ada data pause tersimpan
-            if (!running && !localStorage.getItem('pomo_timeLeft') && !localStorage.getItem('pomo_endTime')) {
-                timeLeft = durations[currentMode];
-                updateTimerDisplay();
+            if(startStopBtn) startStopBtn.textContent = 'PAUSE';
+            app.classList.remove('timer-paused'); app.classList.add('timer-running');
+            
+            timer = setInterval(() => {
+                const left = getTimeLeft();
+                if (left <= 0) { completeSession(); return; }
+                updateDisplay();
+            }, 1000);
+        }
+        localStorage.setItem('pomo_isRunning', isRunning);
+    }
+
+    function completeSession() {
+        clearInterval(timer);
+        isRunning = false;
+        localStorage.setItem('pomo_isRunning', false);
+        localStorage.removeItem('pomo_targetTime');
+        localStorage.setItem('pomo_timeLeft', durations[currentMode]);
+        playSound(soundFinish);
+
+        let nextMode = '';
+        let cycleCount = parseInt(localStorage.getItem('pomo_cycleCount')) || 0;
+        let isSessionPending = localStorage.getItem('pomo_sessionPending') === 'true';
+
+        if (currentMode === 'pomodoro') {
+            dbTotalSeconds += durations.pomodoro;
+            if(statSecondsDisplay) statSecondsDisplay.textContent = dbTotalSeconds;
+            saveLogToBackend(durations.pomodoro, 'completed');
+            localStorage.setItem('pomo_sessionPending', 'true'); 
+            cycleCount++;
+            localStorage.setItem('pomo_cycleCount', cycleCount);
+            
+            const interval = parseInt(settings.longBreakInterval) || 4;
+            nextMode = (cycleCount % interval === 0) ? 'longBreak' : 'shortBreak';
+            
+            switchMode(nextMode);
+            // Ganti Alert dengan Toast
+            showToast(nextMode === 'longBreak' ? "Waktunya Istirahat Panjang!" : "Waktunya Istirahat Pendek!", 'success');
+            
+            if(settings.autoStartBreak) setTimeout(startTimer, 1000);
+
+        } else {
+            if (isSessionPending) {
+                dbTotalSessions += 1;
+                if(statSessionsDisplay) statSessionsDisplay.textContent = dbTotalSessions;
+                saveLogToBackend(durations[currentMode], 'completed');
+                localStorage.setItem('pomo_sessionPending', 'false');
+                switchMode('pomodoro');
+                showToast("Siklus Selesai! Sesi +1. Kembali Fokus!", 'success');
+                if(settings.autoStartPomo) setTimeout(startTimer, 1000);
+            } else {
+                switchMode('pomodoro');
+                showToast("Istirahat Selesai!", 'info');
+                if(settings.autoStartPomo) setTimeout(startTimer, 1000);
             }
         }
-    } catch (error) {
-        console.warn("Gagal ambil config, pakai default.");
     }
-}
 
-async function logSession(type, duration, status) {
-    try {
-        await fetch('/api/log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, duration, status })
-        });
-    } catch (e) { console.error(e); }
-}
+    function skipSession() {
+        const timeLeft = getTimeLeft();
+        const timeSpent = durations[currentMode] - timeLeft;
+        clearInterval(timer);
+        isRunning = false;
+        localStorage.removeItem('pomo_targetTime');
 
-// ==========================================
-// LOGIKA UI
-// ==========================================
+        let nextMode = '';
+        let cycleCount = parseInt(localStorage.getItem('pomo_cycleCount')) || 0;
+        let isSessionPending = localStorage.getItem('pomo_sessionPending') === 'true';
 
-function updateBackground() {
-  document.body.style.backgroundImage = `url('${backgrounds[currentMode]}')`;
-}
-
-function updateTimerDisplay() {
-  const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-  const seconds = (timeLeft % 60).toString().padStart(2, '0');
-  timerDisplay.textContent = `${minutes}:${seconds}`;
-  
-  if (running) {
-    document.title = `${minutes}:${seconds} - ${currentMode}`;
-  } else {
-    document.title = originalTitle;
-  }
-}
-
-function updateCounterDisplay() {
-  sessionCounterDisplay.textContent = `Session: ${pomodoroCount}`;
-}
-
-function updateActiveButton() {
-  pomodoroBtn.classList.remove('active');
-  shortBreakBtn.classList.remove('active');
-  longBreakBtn.classList.remove('active');
-  if (currentMode === 'pomodoro') pomodoroBtn.classList.add('active');
-  if (currentMode === 'shortBreak') shortBreakBtn.classList.add('active');
-  if (currentMode === 'longBreak') longBreakBtn.classList.add('active');
-}
-
-function switchMode(mode) {
-  if (running) {
-    clearInterval(timerInterval);
-    running = false;
-  }
-  
-  startStopBtn.textContent = 'START';
-  app.classList.remove('timer-running');
-  app.classList.remove('timer-paused');
-  
-  currentMode = mode;
-  timeLeft = durations[mode];
-  
-  // Bersihkan storage terkait timer saat ganti mode manual
-  localStorage.removeItem('pomo_endTime');
-  localStorage.removeItem('pomo_timeLeft');
-  saveState(); // Simpan mode baru
-  
-  updateTimerDisplay();
-  updateBackground();
-  updateActiveButton();
-}
-
-// ==========================================
-// LOGIKA TIMER UTAMA
-// ==========================================
-
-function startTimer(isRestoring = false) {
-  if (!isRestoring) playSound(soundClick);
-  
-  if (running && !isRestoring) {
-    // --- PAUSE ---
-    clearInterval(timerInterval);
-    running = false;
-    startStopBtn.textContent = 'RESUME';
-    
-    app.classList.remove('timer-running');
-    app.classList.add('timer-paused'); 
-    document.title = `(Paused) ${originalTitle}`;
-    
-    saveState(); // Simpan kondisi pause
-    
-  } else {
-    // --- START / RESUME ---
-    running = true;
-    startStopBtn.textContent = 'PAUSE';
-    
-    app.classList.remove('timer-paused');
-    app.classList.add('timer-running'); 
-    
-    // Jika BUKAN restore (Start baru), hitung endTime baru
-    if (!isRestoring) {
-        const now = Date.now();
-        endTime = now + (timeLeft * 1000); 
-    }
-    
-    saveState(); // Simpan kondisi jalan (termasuk endTime)
-
-    updateTimerDisplay(); 
-    
-    timerInterval = setInterval(() => {
-      const currentTime = Date.now();
-      const remainingSeconds = Math.ceil((endTime - currentTime) / 1000);
-
-      if (remainingSeconds > 0) {
-        timeLeft = remainingSeconds;
-        updateTimerDisplay();
-      } else {
-        finishSession();
-      }
-    }, 1000);
-  }
-}
-
-function finishSession(silent = false) {
-    clearInterval(timerInterval);
-    timeLeft = 0;
-    updateTimerDisplay();
-    logSession(currentMode, durations[currentMode], 'completed')
-      .then(() => fetchStats());
-
-    handleTimerCompletion();
-    
-    // Hapus data timer dari storage karena sudah selesai
-    localStorage.removeItem('pomo_endTime');
-    localStorage.removeItem('pomo_timeLeft');
-    localStorage.setItem('pomo_running', false);
-
-    if (!silent) {
-        playSound(soundFinish); 
-        alert(`${currentMode} selesai!`);
-    }
-    
-    running = false;
-    startStopBtn.textContent = 'START'; 
-    app.classList.remove('timer-running');
-    app.classList.remove('timer-paused');
-    
-    logSession(currentMode, durations[currentMode], 'completed');
-    handleTimerCompletion(); 
-}
-
-function handleTimerCompletion() {
-    if (currentMode === 'pomodoro') {
-        if (shortBreakCount < 2) { 
-            shortBreakCount++;
-            switchMode('shortBreak');
+        if (currentMode === 'pomodoro') {
+            if (timeSpent > 0) {
+                dbTotalSeconds += timeSpent;
+                if(statSecondsDisplay) statSecondsDisplay.textContent = dbTotalSeconds;
+                saveLogToBackend(timeSpent, 'skipped');
+            }
+            localStorage.setItem('pomo_sessionPending', 'true');
+            cycleCount++;
+            localStorage.setItem('pomo_cycleCount', cycleCount);
+            
+            const interval = parseInt(settings.longBreakInterval) || 4;
+            nextMode = (cycleCount % interval === 0) ? 'longBreak' : 'shortBreak';
+            
+            switchMode(nextMode);
+            showToast("Skipped! Lanjut Istirahat.", 'warning');
+            startTimer();
         } else {
-            shortBreakCount = 0; 
-            switchMode('longBreak');
+            if (isSessionPending) {
+                dbTotalSessions += 1;
+                if(statSessionsDisplay) statSessionsDisplay.textContent = dbTotalSessions;
+                localStorage.setItem('pomo_sessionPending', 'false');
+                switchMode('pomodoro');
+                showToast("Break Skipped! Sesi +1.", 'warning');
+                startTimer();
+            } else {
+                switchMode('pomodoro');
+                startTimer();
+            }
         }
-    } else {
-        if (currentMode !== 'pomodoro') { 
-            pomodoroCount++; 
-            updateCounterDisplay(); 
+    }
+
+    // ==========================================
+    // 7. HELPER & BACKEND
+    // ==========================================
+    function switchMode(mode) {
+        currentMode = mode;
+        isRunning = false; 
+        clearInterval(timer);
+        
+        localStorage.removeItem('pomo_targetTime');
+        localStorage.setItem('pomo_timeLeft', durations[mode]);
+        localStorage.setItem('pomo_mode', mode);
+        localStorage.setItem('pomo_isRunning', false);
+        
+        app.classList.remove('timer-running', 'timer-paused');
+        if(startStopBtn) startStopBtn.textContent = 'START';
+        
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        if (mode === 'pomodoro') document.getElementById('pomodoroBtn').classList.add('active');
+        if (mode === 'shortBreak') document.getElementById('shortBreakBtn').classList.add('active');
+        if (mode === 'longBreak') document.getElementById('longBreakBtn').classList.add('active');
+        
+        // === UPDATE BACKGROUND & CHARACTER (FITUR 5) ===
+        updateBackground();
+        if(charElement && charImages[mode]) {
+            charElement.src = charImages[mode];
         }
-        switchMode('pomodoro');
+
+        updateDisplay();
     }
-    
-    // Auto-save perubahan sesi
-    saveState();
-    
-    // Opsional: Langsung start timer berikutnya? 
-    // startTimer(); 
-}
 
-// ==========================================
-// TOMBOL LAIN
-// ==========================================
-
-function skipSession() {
-    playSound(soundClick);
-    if (running) {
-        clearInterval(timerInterval);
-        running = false;
+    function resetTimer() {
+        clearInterval(timer); isRunning = false;
+        localStorage.removeItem('pomo_targetTime');
+        localStorage.setItem('pomo_timeLeft', durations[currentMode]);
+        localStorage.setItem('pomo_isRunning', false);
+        app.classList.remove('timer-running', 'timer-paused');
+        if(startStopBtn) startStopBtn.textContent = 'START';
+        updateDisplay(); fetchStatsAndReport(); 
     }
-    app.classList.remove('timer-running');
-    app.classList.remove('timer-paused');
-    
-    const timeSpent = durations[currentMode] - timeLeft;
-    logSession(currentMode, timeSpent, 'skipped');
 
-    // alert(`Skipping...`); 
-    
-    if (currentMode !== 'pomodoro') {
-        pomodoroCount++;
-        updateCounterDisplay();
-        switchMode('pomodoro');
+    async function saveLogToBackend(duration, status) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        try {
+            const response = await fetch('/api/log', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                body: JSON.stringify({type: currentMode, duration: duration, status: status})
+            });
+            if (!response.ok) {
+                showToast("Gagal simpan data!", 'error');
+            } else {
+                await fetchStatsAndReport();
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    function updateBackground() { document.body.style.backgroundImage = `url('${backgrounds[currentMode]}')`; }
+    function playSound(audio) { audio.currentTime = 0; audio.play().catch(e => {}); }
+
+    // INIT
+    document.getElementById('pomodoroBtn').addEventListener('click', () => switchMode('pomodoro'));
+    document.getElementById('shortBreakBtn').addEventListener('click', () => switchMode('shortBreak'));
+    document.getElementById('longBreakBtn').addEventListener('click', () => switchMode('longBreak'));
+    startStopBtn.addEventListener('click', startTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    skipBtn.addEventListener('click', skipSession);
+
+    if (isRunning) {
+        startStopBtn.textContent = 'PAUSE'; app.classList.add('timer-running');
+        timer = setInterval(() => { if (getTimeLeft() <= 0) { completeSession(); return; } updateDisplay(); }, 1000);
     } else {
-        handleTimerCompletion();
+        if(localStorage.getItem('pomo_timeLeft') && parseInt(localStorage.getItem('pomo_timeLeft')) < durations[currentMode]) {
+            startStopBtn.textContent = 'RESUME'; app.classList.add('timer-paused');
+        }
     }
-}
-
-function resetCurrentTimer() {
-    playSound(soundClick);
-    if (running) {
-        clearInterval(timerInterval);
-        running = false;
-    }
-    
-    timeLeft = durations[currentMode];
-    localStorage.removeItem('pomo_endTime');
-    localStorage.removeItem('pomo_timeLeft');
-    localStorage.setItem('pomo_running', false);
-    
-    updateTimerDisplay();
-    app.classList.remove('timer-paused');
-    app.classList.remove('timer-running');
-    startStopBtn.textContent = 'START'; 
-}
-
-function resetSessionCounter() {
-    if (confirm("Reset sesi?")) {
-        pomodoroCount = 0;
-        shortBreakCount = 0;
-        updateCounterDisplay();
-        saveState();
-    }
-}
-
-// ==========================================
-// INISIALISASI
-// ==========================================
-pomodoroBtn.addEventListener('click', () => switchMode('pomodoro'));
-shortBreakBtn.addEventListener('click', () => switchMode('shortBreak'));
-longBreakBtn.addEventListener('click', () => switchMode('longBreak'));
-
-startStopBtn.addEventListener('click', () => startTimer(false));
-skipBtn.addEventListener('click', skipSession);
-resetBtn.addEventListener('click', resetCurrentTimer); 
-sessionCounterDisplay.addEventListener('click', resetSessionCounter); 
-
-// URUTAN PENTING:
-// 1. Load config (durasi user)
-// 2. Load state (apakah lagi jalan/pause)
-fetchConfig().then(() => {
-    loadState();
-    fetchStats(); // <--- TAMBAHKAN INI
+    updateDisplay(); updateBackground(); fetchStatsAndReport();
 });
-
-// Ambil data statistik dari Laravel
-async function fetchStats() {
-    try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-            const data = await response.json();
-            
-            // Update tampilan HTML
-            const statMin = document.getElementById('stat-minutes');
-            const statSes = document.getElementById('stat-sessions');
-            
-            if(statMin) statMin.textContent = data.total_minutes;
-            if(statSes) statSes.textContent = data.total_sessions;
-        }
-    } catch (error) {
-        console.error("Gagal ambil stats:", error);
-    }
-}
-

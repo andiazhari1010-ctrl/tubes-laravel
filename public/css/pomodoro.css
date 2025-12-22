@@ -1,193 +1,237 @@
-/*Import font pixel*/
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-/*Import font Poppins untuk footer*/
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap');
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  padding: 0;
-  /* --- DIUBAH: Menggunakan font pixel untuk body --- */
+body.pomodoro-page {
+  margin: 0; padding: 0;
   font-family: 'Press Start 2P', cursive;
   background-color: #b9534c;
+  background-image: url('../images/pxl-bg.jpg'); 
+  background-size: cover; background-position: center; background-attachment: fixed;
   
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  /* Flexbox untuk menengahkan konten */
+  display: flex; justify-content: center; align-items: center;
   
-  background-size: cover;
-  background-position: center;
+  /* Agar responsif di HP, gunakan min-height bukan height */
+  min-height: 100vh; 
+  color: white;
+  image-rendering: pixelated;
   transition: background-image 0.5s ease;
   
-  /* Mencegah anti-aliasing pada font pixel */
-  image-rendering: pixelated; 
+  /* Padding bawah agar konten tidak tertutup menu bawah di HP */
+  padding-bottom: 80px; 
+  padding-top: 60px; /* Space untuk tombol report di atas */
 }
 
-/* Kotak "Frosted Glass" di tengah (PIXEL THEME) */
+/* === BUTTONS HEADER (Report & Setting) === */
+.header-top-center {
+    position: absolute;
+    top: 15px;
+    left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px;
+    z-index: 500;
+    width: 100%; justify-content: center; /* Biar aman di HP */
+}
+
+.pixel-btn-small {
+    background: rgba(0, 0, 0, 0.5);
+    color: white; border: 2px solid white;
+    padding: 8px 12px;
+    font-family: 'Press Start 2P', cursive; font-size: 10px; /* Font aman untuk HP */
+    cursor: pointer; transition: transform 0.1s;
+    text-shadow: 1px 1px 0 #000;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.5);
+}
+.pixel-btn-small:hover {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* === MAIN APP CONTAINER (RESPONSIVE) === */
 #app {
-  background-color: rgba(0, 0, 0, 0.4); 
-  border: 4px solid white;
-  border-radius: 0; 
-  padding: 20px 40px 50px 40px;
-  width: 360px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2; 
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 4px solid white; border-radius: 12px;
+  
+  /* RESPONSIVE LOGIC: Lebar 95% layar HP, tapi mentok di 420px untuk PC */
+  width: 95%; 
+  max-width: 420px;
+  
+  padding: 20px;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
 }
 
 header {
-  margin-bottom: 20px;
-  font-weight: 600;
-  font-size: 16px; 
+    font-size: 14px; margin-bottom: 15px;
+    text-transform: uppercase; letter-spacing: 1px;
+    text-shadow: 2px 2px 0 #000;
+    text-align: center; line-height: 1.5;
 }
 
+/* === NAV BUTTONS === */
 nav {
-  margin-bottom: 10px;
-  width: 100%;
-  text-align: center;
+  display: flex; gap: 5px; margin-bottom: 10px;
+  background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px;
+  flex-wrap: wrap; justify-content: center; /* Biar tombol turun kebawah kalau layar sempit banget */
 }
-
 nav button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 12px; 
-  font-family: 'Press Start 2P', cursive; 
-  margin: 0 5px; 
-  padding: 6px 12px;
-  cursor: pointer;
-  border-radius: 0; 
-  transition: background-color 0.3s;
-  display: inline-block; 
+  background: none; border: none; color: #ccc;
+  font-family: 'Press Start 2P', cursive; font-size: 8px; /* Dikecilkan dikit */
+  padding: 8px 10px; cursor: pointer; transition: all 0.2s;
 }
-
 nav button.active {
-  background-color: white; 
-  color: #b9534c; 
-  font-weight: 700;
+  background-color: #fff; color: #b9534c;
+  font-weight: bold; border-radius: 4px;
+  box-shadow: 0 2px 0 #999;
 }
 
+/* === KARAKTER ANIMASI === */
+.character-container {
+    height: 90px;
+    width: 100%;
+    display: flex; justify-content: center; align-items: flex-end;
+    overflow: hidden;
+}
+
+#pomo-character {
+    height: 80px; 
+    width: auto;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+}
+
+/* === TIMER === */
 #timer {
-  font-size: 64px; 
-  font-weight: 700;
-  margin: 20px 0;
-  cursor: default;
-  user-select: none;
+    font-size: 56px; /* Ukuran aman untuk HP Portrait */
+    margin: 5px 0 10px 0;
+    font-weight: bold;
+    text-shadow: 4px 4px 0 #000;
+    line-height: 1;
 }
 
-#session-counter {
-  font-size: 12px; 
-  font-weight: 600;
-  margin-top: -15px; 
-  margin-bottom: 20px; 
-  color: white;
-  cursor: pointer;
-  user-select: none;
-  transition: opacity 0.2s;
-}
-#session-counter:hover {
-  opacity: 0.8;
-}
+#cycle-dots { margin-bottom: 15px !important; }
 
-.controls-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px; 
+/* === STATS BOX === */
+.stats-container {
+    margin-top: 5px; text-align: center;
+    background: rgba(255,255,255,0.1); padding: 10px;
+    border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; width: 100%;
 }
+.stats-label { font-size: 9px; margin-bottom: 8px; color: #ddd; }
+.stats-row { display: flex; gap: 15px; justify-content: center; color: #fff; }
+.stats-desc { font-size: 7px; margin-top: 4px; opacity: 0.8; }
+#stat-seconds, #stat-sessions { font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+
+/* === CONTROLS === */
+.controls-container { display: flex; justify-content: center; gap: 10px; margin-top: 15px; width: 100%; }
 
 #startStopBtn, #resetBtn, #skipBtn {
-  background-color: white;
-  color: #b9534c;
-  border: 3px solid #b9534c; 
-  padding: 12px 0;
-  width: 130px; 
-  border-radius: 0; 
-  font-weight: 700;
-  font-size: 14px; 
+  background-color: white; color: #b9534c;
+  border: 3px solid #b9534c; border-bottom-width: 6px;
+  padding: 12px 0; width: 100%;
+  font-weight: 700; font-size: 12px;
   font-family: 'Press Start 2P', cursive;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  cursor: pointer; transition: all 0.1s;
+}
+#startStopBtn:active, #resetBtn:active, #skipBtn:active { transform: translateY(3px); border-bottom-width: 3px; }
+
+#resetBtn, #skipBtn { font-size: 10px; display: none; background: #ffebee; }
+#startStopBtn { display: inline-block; }
+
+.timer-running #resetBtn { display: none; }
+.timer-running #skipBtn  { display: inline-block; }
+.timer-running #startStopBtn { display: inline-block; }
+.timer-paused #resetBtn { display: inline-block; }
+.timer-paused #skipBtn  { display: none; }
+.timer-paused #startStopBtn { display: inline-block; }
+
+/* === TOAST NOTIFICATION (Center on Mobile) === */
+#toast-container {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+    z-index: 99999; pointer-events: none;
+    display: flex; flex-direction: column; gap: 10px;
+    width: 90%; max-width: 300px;
+}
+.toast {
+    background: rgba(0, 0, 0, 0.9); color: #fff;
+    padding: 10px 15px; border-radius: 4px; border: 1px solid white;
+    font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    animation: slideDown 0.3s ease-out forwards;
+    pointer-events: auto; display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.toast.hide { animation: fadeOut 0.3s ease-in forwards; }
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+/* === MODAL RESPONSIVE === */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 9999;
+    display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(4px);
+    padding: 20px; /* Biar modal gak nempel pinggir HP */
+}
+.modal-overlay.hidden { display: none; }
+.modal-box {
+    background: #fff; width: 100%; max-width: 380px;
+    border: 4px solid #b9534c; padding: 15px; color: #333; border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7); font-family: 'Poppins', sans-serif;
+    max-height: 80vh; overflow-y: auto; /* Biar bisa discroll di HP landscape */
+}
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+.modal-header h3 { margin: 0; color: #b9534c; font-family: 'Press Start 2P', cursive; font-size: 12px; }
+.close-btn { background: none; border: none; font-size: 18px; font-weight: bold; color: #999; cursor: pointer; }
+
+/* TABS & CONTENT */
+.modal-tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
+.tab-btn { flex: 1; padding: 8px; background: none; border: none; cursor: pointer; font-weight: bold; color: #aaa; font-size: 11px; }
+.tab-btn.active { color: #b9534c; border-bottom: 3px solid #b9534c; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.summary-stats { display: flex; gap: 10px; margin-bottom: 15px; }
+.stat-card { flex: 1; background: #fff5f5; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #ffcccc; }
+.stat-card span { display: block; font-size: 18px; font-weight: bold; color: #b9534c; }
+.stat-card small { font-size: 9px; }
+.chart-container { position: relative; height: 150px; width: 100%; }
+
+/* SETTINGS FORM */
+.setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px; font-size: 12px; }
+.setting-item input[type="number"] { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+.setting-toggle { display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 12px; }
+.modal-footer { text-align: right; margin-top: 15px; }
+.modal-footer button { background: #b9534c; color: white; border: none; padding: 8px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer; border-radius: 4px; }
+
+/* === BOTTOM MENU (RESPONSIVE) === */
+.bottom-menu { 
+    position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; 
+    display: flex; justify-content: space-around; 
+    background: #a5d6a7; padding: 10px 0; border-top: 4px solid #66bb6a;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+}
+.menu-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #1b5e20; font-size: 9px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+.menu-item:hover { transform: scale(1.1); transition: 0.2s; }
+
+/* === MEDIA QUERIES UNTUK HP KECIL === */
+@media (max-width: 400px) {
+    #app { width: 95%; padding: 15px; }
+    #timer { font-size: 42px; } /* Jam dikecilkan */
+    .character-container { height: 70px; }
+    #pomo-character { height: 60px; }
+    .pixel-btn-small { font-size: 8px; padding: 6px 10px; }
+    .header-top-center { top: 10px; }
 }
 
-#startStopBtn:hover, #resetBtn:hover, #skipBtn:hover {
-  background-color: #e6e6e6;
-  color: #8f423b; 
-  border-color: #8f423b;
-}
-
-/*Mengembalikan Tampilan Footer Asli*/
-.bottom-menu {
-  position: fixed; 
-  bottom: 0; 
-  left: 0; 
-  width: 100%; 
-  z-index: 100; 
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: #a5d6a7;
-  padding: 15px 0;
-  border-top: 5px solid #66bb6a;
-}
-
-.menu-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  color: #1b5e20;
-  
-
-  font-family: 'Poppins', sans-serif; 
-  font-size: 21px; 
-  font-weight: 900; 
-}
-
-.menu-item span {
-  font-size: 15px; 
-
-}
-
-.menu-item:hover {
-  transform: scale(1.1);
-  transition: 0.2s;
-}
-
-/*Tampilan Tombol (CSS)*/
-
-#startStopBtn {
-  display: inline-block;
-}
-#resetBtn {
-  display: none;
-}
-#skipBtn {
-  display: none;
-}
-
-#app.timer-running #startStopBtn {
-  display: inline-block;
-}
-#app.timer-running #skipBtn {
-  display: inline-block;
-}
-#app.timer-running #resetBtn {
-  display: none;
-}
-
-#app.timer-paused #startStopBtn {
-  display: inline-block;
-}
-#app.timer-paused #resetBtn {
-  display: inline-block;
-}
-#app.timer-paused #skipBtn {
-  display: none;
+/* === MEDIA QUERIES UNTUK LAYAR PENDEK (LANDSCAPE HP) === */
+@media (max-height: 600px) {
+    body.pomodoro-page { padding-top: 10px; padding-bottom: 70px; align-items: flex-start; overflow-y: auto; }
+    .character-container { display: none; } /* Sembunyikan karakter kalau layar pendek */
+    #app { margin-top: 40px; }
+    .header-top-center { top: 5px; }
 }
