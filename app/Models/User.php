@@ -2,48 +2,48 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+// ... imports yang sudah ada ...
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use App\Models\Friendship; // <--- PASTIKAN ADA BARIS INI DI ATAS
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-    'name',
-    'email',
-    'username', 
-    'password',
-];
+        'name',
+        'email',
+        'password',
+    ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // ==========================================
+    // TAMBAHKAN KODE INI DI BAGIAN BAWAH
+    // ==========================================
+
+    // Relasi 1: Teman yang SAYA ajak (Saya sebagai Sender)
+    // Controller memanggil ini dengan nama 'friendshipsTo'
+    public function friendshipsTo()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Friendship::class, 'user_id');
+    }
+
+    // Relasi 2: Teman yang MENG-AJAK saya (Saya sebagai Receiver)
+    // Controller memanggil ini dengan nama 'friendshipsOf' <--- INI PENYEBAB ERROR 500 KEMARIN
+    public function friendshipsOf()
+    {
+        return $this->hasMany(Friendship::class, 'friend_id');
     }
 }

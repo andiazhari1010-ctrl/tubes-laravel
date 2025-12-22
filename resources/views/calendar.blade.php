@@ -1,98 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pixel Theme Calendar with Toggle Sidebar</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Full Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+  <style>
+      .calendar-grid { height: 60vh; }
+      .calendar-grid > div { display: flex; align-items: center; justify-content: center; font-size: 14px !important; }
+  </style>
 </head>
-<body>
+<body style="background-color: #e8f5e9;">
 
-<div class="d-flex" id="app-container">
-  <nav class="sidebar flex-shrink-0" id="sidebar">
-    <button class="btn-create" id="btnCreateEvent">+ Create Event</button>
-    <div style="margin-bottom: 1rem;">
-      <h6 id="sidebarMonthYear">November 2025</h6>
-      <div class="mini-month">
-        <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
-        <div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>1</div>
-        <div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div>
-        <div class="today">9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div>
-        <div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div>
-        <div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div>
-        <div>30</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
-      </div>
+    <div class="container mt-4 mb-3">
+        <a href="{{ url('/index') }}" class="text-decoration-none btn btn-dark rounded-0" style="font-family:'Press Start 2P'; font-size:10px;">⬅ BACK TO DASHBOARD</a>
     </div>
-    </nav>
 
-  <div class="flex-grow-1 d-flex flex-column" id="main-content" style="height: 100vh;">
-    <div class="calendar-header">
-      <button id="toggleSidebarBtn" title="Toggle sidebar">&#9776;</button>
-      <div>
-        <button id="prevBtn">&lt;</button>
-        <button id="nextBtn">&gt;</button>
-      </div>
-      <div class="month-year" id="monthYear"></div>
-      <div>
-        <button class="view-btn active" id="viewMonth">Month</button>
-        <button class="view-btn" id="viewWeek">Week</button>
-      </div>
-      <button id="todayBtn">TODAY</button>
+    <div class="container">
+        <div class="card p-4" style="border: 4px solid #1b5e20; border-radius: 0; box-shadow: 8px 8px 0 rgba(0,0,0,0.1);">
+            <div id="calendar"></div>
+        </div>
     </div>
-    <div class="calendar-main">
-      <div class="weekdays" id="weekdays"></div>
-      <div class="dates-grid month" id="datesGrid"></div>
+
+    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; border:4px solid #1b5e20; padding:20px; width:300px; text-align:center; box-shadow:8px 8px 0 rgba(0,0,0,0.2);">
+            
+            <h4 style="font-family:'Press Start 2P'; font-size:12px; margin-bottom:15px; color:#1b5e20;">AGENDA</h4>
+            
+            <input type="hidden" id="eventDateInput">
+            <input type="hidden" id="eventIdInput">
+            
+            <div style="margin-bottom:10px; font-family:'Press Start 2P'; font-size:10px; color:#555;" id="eventDateLabel">Date: -</div>
+            
+            <input type="text" id="eventTitleInput" placeholder="Event Name..." style="width:100%; padding:10px; font-family:'Poppins'; border:2px solid #1b5e20; margin-bottom:10px; outline:none;">
+            
+            <label style="font-family:'Press Start 2P'; font-size:8px; color:#555; display:block; text-align:left; margin-bottom:5px;">COLLAB WITH:</label>
+        
+            <div style="position: relative;">
+                <input type="text" id="friendNameInput" class="form-control rounded-0 mb-0" 
+                      placeholder="Type to search friend..." autocomplete="off"
+                      style="border:2px solid #1b5e20; font-family:'Poppins'; font-size:12px;">
+                
+                <div id="friendSuggestions" class="suggestion-box"></div>
+            </div>
+
+            <input type="hidden" id="eventFriendId">
+            <div style="display:flex; justify-content:center; gap:10px; margin-top: 20px;">
+                <button id="saveEventBtn" class="btn btn-sm btn-success rounded-0 badge-pixel">SAVE</button>
+                <button id="deleteEventBtn" class="btn btn-sm btn-danger rounded-0 badge-pixel" style="display:none;">DELETE</button>
+                <button onclick="document.getElementById('eventModal').style.display='none'" class="btn btn-sm btn-secondary rounded-0 badge-pixel">CLOSE</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="eventDetailModalLabel">Events on DATE</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="modalEventList"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="addEventForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addEventModalLabel">Add New Event</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label for="eventDateInput" class="form-label">Date</label>
-        <input type="date" id="eventDateInput" class="form-control" required />
-        <label for="eventTextInput" class="form-label mt-3">Event Title</label>
-        <input type="text" id="eventTextInput" class="form-control" minlength="1" required />
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary btn-sm">Add Event</button>
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div class="bottom-menu">
-    <a href="{{ url('/index') }}" class="menu-item">🏠 <span>Dashboard</span></a>
-    <a href="{{ url('/pomodoro') }}" class="menu-item">🍅 <span>Pomodoro</span></a>
-    <a href="{{ url('/notes') }}" class="menu-item">🗒️ <span>Notes</span></a>
-    <a href="{{ url('/calendar') }}" class="menu-item">📅 <span>Calendar</span></a>
-    <a href="{{ url('/info') }}" class="menu-item">ℹ️ <span>Info</span></a>
-  </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{{ asset('js/calendar.js') }}"></script>
-
+    <script src="{{ asset('js/script.js') }}"></script>
 </body>
 </html>

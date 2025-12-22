@@ -1,56 +1,78 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+// --- IMPORT CONTROLLERS ---
 use App\Http\Controllers\AuthController; 
-use App\Http\Controllers\NoteController; // Pastikan Controller Notes di-import
-use App\Http\Controllers\Api\PomodoroController; // [BARU] Import Controller Pomodoro
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\Api\PomodoroController;
+use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\InviteController;
 
-// --- HALAMAN PUBLIC (TIDAK BUTUH LOGIN) ---
+// [PENTING] Kita bedakan nama Controller View dan Controller API
+use App\Http\Controllers\FriendController as FriendViewController; 
+use App\Http\Controllers\Api\FriendController as FriendApiController; 
 
-// Halaman Depan
+
+// --- PUBLIC ---
 Route::get('/', function () { return view('home'); });
-
-// Authentication Routes
 Route::get('/login', function () { return view('login'); })->name('login');
 Route::get('/register', function () { return view('register'); });
-
-// Proses Form Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/logout', [AuthController::class, 'logout']);
 
 
-// --- HALAMAN YANG BUTUH LOGIN (DIPROTEKSI MIDDLEWARE) ---
-
+// --- AUTHENTICATED USER ---
 Route::middleware('auth')->group(function () {
     
-    // 1. Menu Navigasi Utama
+    // VIEWS (Tampilan)
     Route::get('/index', function () { return view('index'); });
     Route::get('/pomodoro', function () { return view('pomodoro'); });
     Route::get('/calendar', function () { return view('calendar'); });
     Route::get('/notes', function () { return view('notes'); });
-    Route::get('/notification', function () { return view('notification'); });
-    Route::get('/add-friend', function () { return view('add-friend'); });
     Route::get('/info', function () { return view('info'); });
 
-    // 2. Fitur Notes
+    // Halaman Notifikasi (Pastikan nama file: notifications.blade.php)
+    Route::get('/notifications', [NotificationController::class, 'listAll']);
+
+    // Halaman Add Friend (Menggunakan Controller View)
+    Route::get('/add-friend', [FriendViewController::class, 'index']);
+
+
+    // FITUR NOTES
     Route::get('/notes/data', [NoteController::class, 'index']);
     Route::post('/notes/save', [NoteController::class, 'store']);
     Route::delete('/notes/delete/{id}', [NoteController::class, 'destroy']);
 
-    // 3. Fitur Pomodoro (API Internal) - [PENTING: INI PERBAIKANNYA]
-    // Ditaruh di sini agar bisa membaca Session User yang sedang login (Auth::id())
+    // FITUR POMODORO
     Route::post('/api/log', [PomodoroController::class, 'storeLog']);
     Route::get('/api/stats', [PomodoroController::class, 'getStats']);
 
-    // API ROUTES
-    Route::get('/api/search', [App\Http\Controllers\Api\SearchController::class, 'search']);
-    Route::post('/api/friend/add', [App\Http\Controllers\Api\FriendController::class, 'addFriend']);
-    Route::get('/api/friend/requests', [App\Http\Controllers\Api\FriendController::class, 'getIncomingRequests']);
-    Route::get('/api/friend/list', [App\Http\Controllers\Api\FriendController::class, 'getMyFriends']);
-    Route::post('/api/friend/accept/{id}', [App\Http\Controllers\Api\FriendController::class, 'acceptFriend']);
-    Route::post('/api/friend/reject/{id}', [App\Http\Controllers\Api\FriendController::class, 'rejectFriend']);
-    Route::get('/api/notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
-    Route::post('/api/notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+    // FITUR SEARCH
+    Route::get('/api/search', [SearchController::class, 'search']);
+
+    // FITUR FRIEND (Menggunakan Controller API)
+    Route::post('/api/friend/add', [FriendApiController::class, 'addFriend']);
+    Route::get('/api/friend/requests', [FriendApiController::class, 'getIncomingRequests']);
+    Route::get('/api/friend/list', [FriendApiController::class, 'getMyFriends']);
+    Route::post('/api/friend/accept/{id}', [FriendApiController::class, 'acceptFriend']);
+    Route::post('/api/friend/reject/{id}', [FriendApiController::class, 'rejectFriend']);
+    // API UNFRIEND (Baru)
+    Route::post('/api/friend/unfriend', [FriendApiController::class, 'unfriend']);
+
+    // FITUR NOTIFICATIONS
+    Route::get('/api/notifications', [NotificationController::class, 'index']);
+    Route::post('/api/notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+    // FITUR CALENDAR & EVENTS
+    Route::get('/api/events', [EventController::class, 'index']);
+    Route::post('/api/events', [EventController::class, 'store']);
+    Route::delete('/api/events/{id}', [EventController::class, 'destroy']);
+
+    // FITUR INVITE
+    Route::post('/api/invite/{id}', [InviteController::class, 'respond']);
 
 });

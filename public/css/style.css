@@ -9,12 +9,9 @@
 
 body {
   font-family: 'Press Start 2P', cursive;
-  /* Ganti Background Image sesuai file kamu */
   background: url('../images/background.jpg') no-repeat center center fixed;
   background-size: cover;
-  /* Fallback color kalau gambar gagal load */
   background-color: #e8f5e9;
-  
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -30,16 +27,15 @@ body {
   align-items: center;
   padding: 15px 20px;
   position: relative;
-  z-index: 500; /* PENTING: Supaya tombol bisa diklik */
-  background: rgba(0, 0, 0, 0.1); /* Sedikit gelap biar kontras */
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.1);
   height: 80px;
 }
 
-/* Icon Box Style */
 .icon-box {
   background: #ffffffb3;
   border: 3px solid #66bb6a;
-  border-radius: 50%; /* Bulat */
+  border-radius: 50%;
   width: 50px; height: 50px;
   display: flex; justify-content: center; align-items: center;
   font-size: 20px;
@@ -55,7 +51,6 @@ body {
   background: #c8e6c9;
 }
 
-/* Tombol Logout (Spesifik) */
 .logout-icon {
   background: #ffcccc;
   border-color: #ef5350;
@@ -77,39 +72,13 @@ body {
   padding: 12px 15px;
   border: 3px solid #0f5132;
   border-radius: 25px;
-  font-family: 'Poppins', sans-serif; /* Font biasa buat input biar kebaca */
+  font-family: 'Poppins', sans-serif;
   font-size: 14px;
   background: rgba(255, 255, 255, 0.9);
   color: #0f5132;
   outline: none;
   box-shadow: 0 0 10px rgba(102, 187, 106, 0.5);
 }
-
-.search-history {
-  list-style: none;
-  position: absolute;
-  top: 50px;
-  width: 100%;
-  max-width: 500px;
-  background: white;
-  border: 2px solid #0f5132;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 600;
-  display: none;
-}
-.search-history:not(:empty) { display: block; }
-
-.search-history li {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  font-family: sans-serif;
-  font-size: 12px;
-  text-align: left;
-}
-.search-history li:hover { background: #e8f5e9; }
-
 
 /* ===== DASHBOARD MAIN ===== */
 .dashboard {
@@ -153,29 +122,10 @@ body {
   border-radius: 50%;
 }
 
-/* Animasi Melayang */
 .floating { animation: floatUpDown 3s ease-in-out infinite; }
 @keyframes floatUpDown {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
-}
-
-/* Hiasan Hati */
-.heart {
-  position: absolute;
-  font-size: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  animation: floatHeart 2s infinite ease-in-out;
-  color: #2e7d32;
-  z-index: 1;
-}
-#heartLeft { left: 20%; }
-#heartRight { right: 20%; }
-
-@keyframes floatHeart {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  50% { transform: translateY(-60%) scale(1.2); }
 }
 
 /* JAM DIGITAL */
@@ -191,18 +141,6 @@ body {
   padding: 8px 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   z-index: 100;
-}
-
-/* KALENDER WIDGET (Placeholder) */
-.calendar-widget {
-  position: absolute;
-  bottom: 20px; left: 20px;
-  background: rgba(255,255,255,0.8);
-  border: 3px solid #66bb6a;
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 12px;
-  font-family: monospace;
 }
 
 /* ===== BOTTOM MENU ===== */
@@ -236,7 +174,6 @@ body {
 .menu-item:hover { transform: scale(1.1); }
 .menu-item.active { color: #000; font-weight: 900; }
 
-
 /* ===== LOGOUT POPUP ===== */
 .logout-popup {
   position: fixed;
@@ -267,53 +204,13 @@ body {
   font-size: 20px;
 }
 
-.popup-box p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  margin-bottom: 25px;
-  color: #333;
-}
-
-.popup-actions { display: flex; gap: 10px; justify-content: center; }
-
-.popup-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.popup-btn.yes {
-  background: #ffcccc;
-  color: #c62828;
-  border: 2px solid #ef5350;
-}
-.popup-btn.yes:hover { background: #ffcdd2; }
-
-.popup-btn.cancel {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 2px solid #66bb6a;
-}
-.popup-btn.cancel:hover { background: #c8e6c9; }
-
-
 /* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 600px) {
   .welcome-text { font-size: 16px; }
   .avatar-box { width: 140px; height: 140px; }
   .icon-box { width: 40px; height: 40px; font-size: 16px; }
-  .search-container { margin: 0 10px; }
-  .search-bar { font-size: 12px; padding: 8px; }
   .top-clock { top: 80px; font-size: 14px; }
-  
-  /* Sembunyikan elemen hiasan di HP biar gak penuh */
-  .heart, .calendar-widget { display: none; }
-  
+  .calendar-widget { display: none; }
   .menu-item { font-size: 16px; }
   .menu-item span { font-size: 8px; }
 }
@@ -325,7 +222,6 @@ body {
     display: flex;
     flex-direction: column;
     background: #fff;
-    /* Pastikan widget tidak tertutup elemen lain */
     z-index: 10; 
 }
 
@@ -373,7 +269,6 @@ body {
     border: 1px solid #66bb6a;
 }
 
-/* Hari Ini (Hijau Gelap) */
 .calendar-day.today {
     background-color: #43a047;
     color: white;
@@ -382,8 +277,33 @@ body {
     box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
 }
 
-.calendar-day.empty {
-    background: transparent;
-    cursor: default;
-    border: none;
+/* ===== STYLE BARU: DROPDOWN SUGGESTION TEMAN ===== */
+.suggestion-box {
+    position: absolute;
+    width: 100%;
+    background: #fff;
+    border: 4px solid #1b5e20;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10000; /* Di atas modal */
+    display: none;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    text-align: left;
 }
+
+.suggestion-item {
+    padding: 10px;
+    border-bottom: 2px dashed #ccc;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    color: #333;
+}
+
+.suggestion-item:hover {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    font-weight: bold;
+}
+
+.suggestion-item:last-child { border-bottom: none; }

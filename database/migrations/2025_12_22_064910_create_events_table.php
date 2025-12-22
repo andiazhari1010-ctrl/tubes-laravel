@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::create('friendships', function (Blueprint $table) {
+    Schema::create('events', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Pengirim
-        $table->foreignId('friend_id')->constrained('users')->onDelete('cascade'); // Penerima
-        $table->string('status')->default('pending'); // pending, accepted, rejected
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->string('title'); // Nama agenda
+        $table->date('event_date'); // Tanggal agenda
+        $table->string('color')->default('#ef5350'); // Warna penanda (Merah default)
         $table->timestamps();
     });
 }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('friendships');
+        Schema::dropIfExists('events');
     }
 };
