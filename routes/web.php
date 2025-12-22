@@ -43,4 +43,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/log', [PomodoroController::class, 'storeLog']);
     Route::get('/api/stats', [PomodoroController::class, 'getStats']);
 
+    // API ROUTES
+    Route::get('/api/search', [App\Http\Controllers\Api\SearchController::class, 'search']);
+    Route::post('/api/friend/add', [App\Http\Controllers\Api\FriendController::class, 'addFriend']);
+    Route::get('/api/friend/requests', [App\Http\Controllers\Api\FriendController::class, 'getIncomingRequests']);
+    Route::get('/api/friend/list', [App\Http\Controllers\Api\FriendController::class, 'getMyFriends']);
+    Route::post('/api/friend/accept/{id}', [App\Http\Controllers\Api\FriendController::class, 'acceptFriend']);
+    Route::post('/api/friend/reject/{id}', [App\Http\Controllers\Api\FriendController::class, 'rejectFriend']);
+    Route::get('/api/notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/api/notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+
 });
