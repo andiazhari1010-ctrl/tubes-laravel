@@ -1,4 +1,5 @@
-home.css
+/* public/css/home.css */
+
 /* ===== RESET ===== */
 * {
   margin: 0;
@@ -8,24 +9,28 @@ home.css
 
 /* ===== GLOBAL ===== */
 body {
+  /* Menggunakan dvh (dynamic viewport height) untuk support browser HP lebih baik */
   min-height: 100vh;
+  min-height: 100dvh; 
   display: flex;
   flex-direction: column;
 
   /* BACKGROUND GAMBAR */
   background: 
     linear-gradient(
-      rgba(0, 0, 0, 0.15), 
-      rgba(0, 0, 0, 0.15)
+      rgba(0, 0, 0, 0.3), 
+      rgba(0, 0, 0, 0.3)
     ),
-    url("home1.jpeg");
+    url("../images/home1.jpeg"); /* Pastikan path gambar benar */
 
-  background-size: cover;       /* gambar memenuhi layar */
-  background-position: center;  /* fokus di tengah */
-  background-repeat: no-repeat; /* tidak diulang */
+  background-size: cover;       
+  background-position: center;  
+  background-repeat: no-repeat; 
+  background-attachment: fixed; /* Parallax effect sederhana */
 
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif; /* Tambahkan font modern jika ada */
   color: #1b1b1b;
+  overflow-x: hidden; /* Mencegah scroll horizontal di HP */
 }
 
 
@@ -34,23 +39,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 40px;
+  padding: 16px 5%; /* Gunakan persen agar aman di layar lebar */
   position: sticky;
   top: 0;
-  z-index: 10;
-  /* tidak putih lagi, hijau lembut transparan */
-  background: linear-gradient(
-    to bottom,
-    rgba(232, 245, 233, 0.95),
-    rgba(200, 230, 201, 0.8)
-  );
-  backdrop-filter: blur(10px);
+  z-index: 100;
+  background: rgba(232, 245, 233, 0.9); /* Transparansi glassmorphism */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
 }
 
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .brand-logo {
@@ -58,9 +60,9 @@ body {
 }
 
 .brand-text {
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: 0.05em;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
   color: #1b5e20;
 }
 
@@ -70,298 +72,339 @@ body {
 }
 
 .login-btn {
-  padding: 8px 18px;
-  border-radius: 999px;
+  padding: 10px 24px;
+  border-radius: 50px;
   border: none;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   background: #2e7d32;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.45);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+  transition: all 0.3s ease;
 }
 
 .login-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   background: #1b5e20;
-  box-shadow: 0 6px 18px rgba(27, 94, 32, 0.55);
+  box-shadow: 0 6px 20px rgba(27, 94, 32, 0.5);
 }
 
 /* ===== HERO LAYOUT ===== */
 .hero {
   flex: 1;
   display: flex;
-  padding: 40px 50px 40px;
+  /* Padding responsif: Atas/Bawah lebih besar, Kiri/Kanan persen */
+  padding: 60px 8%; 
   gap: 40px;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  max-width: 1400px; /* Batas lebar agar tidak terlalu melar di layar 4K */
+  margin: 0 auto;
 }
 
-/* ===== HERO TEXT (SINGKAT) ===== */
+/* ===== HERO TEXT ===== */
 .hero-text {
-  flex: 1.1;
-  max-width: 520px;
+  flex: 1;
+  max-width: 600px;
+  z-index: 2;
 }
 
-.hero-tagline {
-  text-transform: uppercase;
+/* Container Glass Effect untuk Teks */
+.home-hero-text {
+  background: rgba(255, 255, 255, 0.1); 
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.home-hero-text h4 {
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  font-size: 12px;                 /* sedikit lebih besar */
-  color: #1b5e20;
-  margin-bottom: 14px;
+  letter-spacing: 2px;
+  color: #a5d6a7; /* Hijau muda terang agar kontras di bg gelap */
+  margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
-/* PERBESAR JUDUL KIRI */
-.hero-title {
-  font-size: 48px;                 /* sebelumnya 36px */
-  line-height: 1.22;
+.home-hero-text h1 {
+  /* Fluid Typography: Ukuran berubah mulus antara 2.5rem sampai 3.5rem */
+  font-size: clamp(2.5rem, 5vw, 4rem); 
+  line-height: 1.1;
   font-weight: 800;
-  margin-bottom: 16px;
-  color: #0d3111;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.hero-subtitle {
-  font-size: 16px;                 /* sedikit lebih besar */
-  line-height: 1.7;
-  color: #2e4d34;
-  max-width: 450px;
+.home-hero-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #e8f5e9;
+  margin-bottom: 0;
 }
 
 .hero-actions {
-  margin-top: 26px;
+  margin-top: 30px;
 }
 
 .cta-btn {
-  padding: 12px 26px;
-  border-radius: 999px;
+  padding: 16px 32px;
+  border-radius: 50px;
   border: none;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  background: linear-gradient(135deg, #43a047, #66bb6a);
+  background: linear-gradient(135deg, #66bb6a, #43a047);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 6px 18px rgba(67, 160, 71, 0.55);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.cta-btn::after {
-  content: "→";
-  font-size: 16px;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(67, 160, 71, 0.4);
+  transition: all 0.3s ease;
 }
 
 .cta-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(46, 125, 50, 0.7);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(67, 160, 71, 0.6);
 }
 
 /* ===== VISUAL: PHONE STACK ===== */
 .hero-visual {
-  flex: 0.9;
+  flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
-/* container visual: dibuat tidak bisa select teks, dan cursor normal */
+/* Phone Container */
 .phone-stack {
   position: relative;
-  width: 320px;
-  max-width: 100%;
+  width: 300px; /* Lebar dasar */
+  height: auto;
   user-select: none;
   cursor: default;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.3s ease;
+  perspective: 1000px; /* Memberi kedalaman 3D */
 }
 
-/* efek mengambang saat hover di area gambar */
 .phone-stack:hover {
-  transform: translateY(-10px);
+  transform: translateY(-15px) rotateX(5deg);
 }
 
-/* Kartu ponsel dasar */
 .phone-card {
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.85);
-  overflow: hidden;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 
+    0 20px 50px rgba(0,0,0,0.3),
+    inset 0 0 0 2px rgba(255,255,255,0.5); /* Border halus */
   width: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Kartu belakang (blur hijau) */
+/* Kartu Belakang */
 .phone-back {
   position: absolute;
-  top: 24px;
-  left: -26px;
-  transform: rotate(-8deg);
-  background: linear-gradient(145deg, #a5d6a7, #66bb6a);
-  box-shadow: 0 12px 32px rgba(27, 94, 32, 0.5);
+  top: 30px;
+  left: -40px; /* Geser ke kiri */
+  transform: rotate(-10deg) scale(0.95);
+  background: linear-gradient(135deg, #81c784, #2e7d32);
+  opacity: 0.9;
+  z-index: 1;
 }
 
+/* Kartu Depan */
 .phone-front {
   position: relative;
-  transform: rotate(3deg);
+  transform: rotate(5deg);
+  z-index: 2;
+  background: #fff;
 }
 
-/* HEADER PONSEL */
+/* Header HP */
 .phone-header {
   display: flex;
-  gap: 5px;
-  padding: 9px 13px;
-  background: linear-gradient(90deg, #1b5e20, #66bb6a);
+  gap: 6px;
+  padding: 12px 15px;
+  background: #f1f8e9;
+  border-bottom: 1px solid #dcedc8;
 }
 
 .phone-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #c8e6c9;
+  background: #c5e1a5;
 }
 
-/* BODY PONSEL: BELAKANG */
-.phone-back .phone-body {
-  padding: 18px 18px 20px;
+.phone-dot:nth-child(1) { background: #ef5350; } /* Merah */
+.phone-dot:nth-child(2) { background: #ffca28; } /* Kuning */
+.phone-dot:nth-child(3) { background: #66bb6a; } /* Hijau */
+
+/* Body HP */
+.phone-body {
+  padding: 20px;
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 12px;
-  margin-bottom: 8px;
-  color: #0d2b10;
-  background: rgba(255,255,255,0.85);
-}
-
-.pill-green {
-  font-weight: 700;
-}
-
-.pill-soft {
-  opacity: 0.9;
-}
-
-.pill.small {
-  font-size: 11px;
-}
-
-/* BODY PONSEL: DEPAN */
-.phone-front .phone-body {
-  padding: 18px 18px 20px;
-}
-
+/* List Items (Isi HP) */
 .section-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: #1b5e20;
-  margin-bottom: 10px;
+  color: #9e9e9e;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
 }
 
 .list-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 12px;
-  background: #f5f5f5;
-  margin-bottom: 8px;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fafafa;
+  margin-bottom: 10px;
+  border: 1px solid #f0f0f0;
+  transition: transform 0.2s;
+}
+
+.list-item:hover {
+  background: #f1f8e9;
+  transform: scale(1.02);
 }
 
 .list-item span {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .item-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1b1b1b;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
 }
 
 .item-sub {
-  font-size: 11px;
-  color: #616161;
+  font-size: 12px;
+  color: #757575;
+}
+
+/* Pills (Badge) untuk Phone Back */
+.pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 12px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 /* ===== FOOTER ===== */
 .footer {
   text-align: center;
-  padding: 14px 18px 20px;
-  font-size: 11px;
-  color: #e8f5e9;
+  padding: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(5px);
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 960px) {
+/* =========================================
+   RESPONSIVE MEDIA QUERIES (JANTUNGNYA)
+   ========================================= */
+
+/* 1. Tablet & Laptop Kecil (max-width: 1024px) */
+@media (max-width: 1024px) {
   .hero {
-    flex-direction: column;
-    padding: 28px 22px 32px;
-    gap: 28px;
+    flex-direction: column; /* Ubah jadi atas-bawah */
+    justify-content: center;
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  .hero-text {
+    max-width: 80%;
+    margin-bottom: 40px;
+  }
+
+  .home-hero-text {
+    padding: 40px; /* Tambah padding biar lega */
+  }
+  
+  /* Geser visual sedikit agar pas di tengah */
+  .phone-stack {
+    margin-left: 20px; /* Kompensasi geseran phone-back */
+  }
+}
+
+/* 2. Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .nav {
+    padding: 15px 20px;
+  }
+
+  .brand-text {
+    font-size: 18px; /* Kecilkan logo */
   }
 
   .hero-text {
     max-width: 100%;
   }
 
-  .hero-title {
-    font-size: 34px;
+  .home-hero-text h1 {
+    font-size: 2.5rem; /* Ukuran fix untuk HP */
   }
-
+  
+  /* Kecilkan dan atur posisi HP agar tidak terpotong */
   .hero-visual {
     width: 100%;
+    overflow: visible; /* Biarkan bayangan terlihat */
+    padding-bottom: 40px;
   }
 
   .phone-stack {
-    margin-top: 10px;
+    width: 260px; /* Kecilkan ukuran dasar HP */
+    transform: scale(0.9); /* Scale down sedikit */
+    margin-left: 30px; /* Geser kanan biar phone-back gak kepotong layar kiri */
   }
 }
 
-@media (max-width: 600px) {
+/* 3. Mobile Kecil (max-width: 480px) */
+@media (max-width: 480px) {
   .nav {
-    padding: 12px 18px;
+    padding: 12px 15px;
+  }
+  
+  .brand-text span {
+    display: none; /* Opsional: sembunyikan ikon jika terlalu sempit */
   }
 
   .hero {
-    padding: 22px 16px 28px;
+    padding: 30px 20px;
   }
 
-  .hero-title {
-    font-size: 28px;
+  .home-hero-text {
+    padding: 25px 20px;
   }
 
-  .hero-subtitle {
-    font-size: 14px;
+  .phone-stack {
+    width: 240px;
+    margin-left: 25px; /* Sesuaikan lagi */
   }
-}
 
-/* ===================================================
-   Opsi A — Overlay Transparan Untuk Teks Agar Jelas
-   Tanpa Mengubah Struktur CSS Lama
-   =================================================== */
-
-.home-hero-text {
-  background: rgba(0, 40, 20, 0.45);   /* hijau gelap transparan */
-  padding: 32px;
-  border-radius: 18px;
-  backdrop-filter: blur(4px);
-  color: #e9ffe9 !important;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.45);
-}
-
-.home-hero-text h1,
-.home-hero-text h2,
-.home-hero-text h3 {
-  color: #ffffff !important;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.55);
-}
-
-.home-hero-text p {
-  color: #d6f5d6 !important;
+  .phone-back {
+    left: -25px; /* Kurangi offset phone back */
+  }
+  
+  .cta-btn {
+    width: 100%; /* Tombol jadi full width biar gampang dipencet */
+    justify-content: center;
+  }
 }

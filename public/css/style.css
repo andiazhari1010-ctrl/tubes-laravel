@@ -57,7 +57,7 @@ body {
   color: #c62828;
 }
 
-/* ===== SEARCH BAR ===== */
+/* ===== SEARCH BAR (SUDAH DIPERBAIKI ADA HOVERNYA) ===== */
 .search-container {
   flex: 1;
   display: flex;
@@ -77,7 +77,28 @@ body {
   background: rgba(255, 255, 255, 0.9);
   color: #0f5132;
   outline: none;
+  
+  /* Transisi halus agar gerakannya enak dilihat */
+  transition: all 0.2s ease-in-out;
+  
+  /* Bayangan awal (tipis) */
   box-shadow: 0 0 10px rgba(102, 187, 106, 0.5);
+}
+
+/* EFEK SAAT MOUSE DIARAHKAN (HOVER) - MUNCUL BAYANGAN TEBAL */
+.search-bar:hover {
+  transform: translate(-4px, -4px); /* Gerak naik ke kiri atas */
+  box-shadow: 6px 6px 0px #1b5e20;  /* Muncul bayangan tebal (Pixel style) */
+  background-color: #fff;
+  border-color: #1b5e20;
+  cursor: text;
+}
+
+/* EFEK SAAT SEDANG DIKETIK (FOCUS) */
+.search-bar:focus {
+  transform: translate(-2px, -2px); /* Turun sedikit */
+  box-shadow: 3px 3px 0px #1b5e20;  /* Bayangan menipis */
+  background-color: #e8f5e9;        /* Warna jadi agak hijau */
 }
 
 /* ===== DASHBOARD MAIN ===== */

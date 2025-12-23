@@ -8,6 +8,7 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
     <style>
@@ -45,6 +46,56 @@
             box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
         }
         .btn-pixel:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+
+        /* --- PIXEL SEARCH BAR STYLES (BARU) --- */
+        .pixel-search-group {
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.15); /* Bayangan kotak kasar */
+            transition: all 0.2s;
+        }
+
+        .pixel-search-group:hover {
+            transform: translate(-2px, -2px); /* Efek melayang saat di-hover */
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .pixel-input-icon {
+            background-color: #1b5e20; /* Warna hijau tua */
+            border: 4px solid #1b5e20;
+            border-radius: 0; /* Sudut tajam */
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .pixel-input-field {
+            border: 4px solid #1b5e20;
+            border-radius: 0;
+            font-family: 'Poppins', sans-serif; 
+            font-size: 14px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        .pixel-input-field:focus {
+            box-shadow: none;
+            border-color: #1b5e20;
+            background-color: #f1f8e9; /* Hijau sangat muda saat aktif */
+        }
+
+        .pixel-btn-action {
+            background-color: #2e7d32;
+            color: white;
+            border: 4px solid #1b5e20;
+            border-left: none;
+            border-radius: 0;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            padding: 0 20px;
+        }
+
+        .pixel-btn-action:hover {
+            background-color: #1b5e20;
+            color: #fff;
+        }
     </style>
 </head>
 <body class="pb-5">
@@ -58,11 +109,22 @@
             <div class="badge bg-success rounded-0 p-2" style="font-family:'Press Start 2P'; font-size:10px;">ONLINE</div>
         </div>
 
-        <div class="mb-4">
-            <input type="text" id="pageSearchInput" class="form-control rounded-0" 
-                   style="border: 4px solid #1b5e20; font-family: 'Poppins'; padding: 10px;" 
-                   placeholder="Find new friends here..." autocomplete="off">
-            <div id="pageSearchResults" class="mt-2"></div>
+        <div class="mb-4 position-relative">
+            <div class="input-group pixel-search-group">
+                <span class="input-group-text pixel-input-icon">
+                    🔎
+                </span>
+                
+                <input type="text" 
+                       id="pageSearchInput" 
+                       class="form-control pixel-input-field" 
+                       placeholder="FIND USERNAME..." 
+                       autocomplete="off">
+                       
+                <button class="btn pixel-btn-action" type="button">SEARCH</button>
+            </div>
+
+            <div id="pageSearchResults" class="position-absolute w-100 mt-2" style="z-index: 999;"></div>
         </div>
 
         <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
@@ -177,16 +239,19 @@
         async function respond(id, action) {
             if(!confirm(action === 'accept' ? "Accept request?" : "Reject request?")) return;
             try {
+                // Perbaikan: Endpoint API menerima ID User pengirim (req.id), bukan ID friendship
                 await fetch(`/api/friend/${action}/${id}`, { 
                     method: 'POST', 
                     headers: {'X-CSRF-TOKEN': csrfToken} 
                 });
-                loadRequests(); // Refresh request list
-                loadFriends();  // Refresh friend list
+                
+                // Refresh data setelah respond
+                loadRequests(); 
+                loadFriends();  
             } catch(e) { alert("Error processing request"); }
         }
 
-        // 4. SEARCH LOGIC DI HALAMAN INI
+        // 4. SEARCH LOGIC
         const searchInput = document.getElementById('pageSearchInput');
         const searchResults = document.getElementById('pageSearchResults');
         let timeout = null;
@@ -196,21 +261,25 @@
             const query = this.value.trim();
             if(!query) { searchResults.innerHTML = ''; return; }
             
-            // Delay 500ms agar tidak spam API saat mengetik cepat
+            // Delay 500ms agar tidak spam API
             timeout = setTimeout(async () => {
                 const res = await fetch(`/api/search?q=${query}`);
                 const users = await res.json();
                 searchResults.innerHTML = '';
                 
                 if(users.length === 0) {
-                    searchResults.innerHTML = '<div class="text-muted text-center p-2">No users found.</div>';
+                    searchResults.innerHTML = '<div class="card-pixel bg-white p-2 text-muted text-center">No users found.</div>';
                     return;
                 }
 
                 users.forEach(u => {
                     const div = document.createElement('div');
-                    div.className = 'card-pixel p-2 mb-2 d-flex justify-content-between align-items-center';
+                    // Perbaikan: Tambahkan bg-white agar teks terbaca jelas karena position-absolute
+                    div.className = 'card-pixel p-2 mb-2 d-flex justify-content-between align-items-center bg-white'; 
                     div.style.borderWidth = '2px';
+                    // Pastikan Z-Index tinggi agar muncul di atas tab
+                    div.style.zIndex = '1000'; 
+                    
                     div.innerHTML = `
                         <div class="d-flex align-items-center gap-2">
                             <div style="width:30px; height:30px; background:#1b5e20; color:white; border-radius:50%; display:grid; place-items:center; font-weight:bold; font-size:10px;">${u.name[0].toUpperCase()}</div>
@@ -225,22 +294,27 @@
 
         async function addFriend(id, name) {
             if(!confirm("Add " + name + "?")) return;
-            const res = await fetch('/api/friend/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ friend_id: id })
-            });
-            const data = await res.json();
-            alert(res.ok ? "Request sent!" : data.message);
-            
-            // Bersihkan hasil pencarian setelah add
-            if(res.ok) {
-                searchInput.value = '';
-                searchResults.innerHTML = '';
+            try {
+                const res = await fetch('/api/friend/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify({ friend_id: id })
+                });
+                const data = await res.json();
+                
+                if(res.ok) {
+                    alert("Request sent!");
+                    searchInput.value = '';
+                    searchResults.innerHTML = '';
+                } else {
+                    alert(data.message);
+                }
+            } catch(e) { 
+                alert("Network Error"); 
             }
         }
 
-        // 5. FUNGSI UNFRIEND (BARU DITAMBAHKAN)
+        // 5. UNFRIEND LOGIC
         async function unfriendUser(id, name) {
             if(!confirm(`Are you sure you want to unfriend ${name}? 😢`)) return;
             
@@ -253,7 +327,7 @@
 
                 if(res.ok) {
                     alert(`${name} has been removed from your friends.`);
-                    loadFriends(); // Refresh otomatis
+                    loadFriends();
                 } else {
                     alert("Failed to unfriend.");
                 }

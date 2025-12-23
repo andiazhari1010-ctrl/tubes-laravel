@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 
 class FriendController extends Controller
 {
-    // Tugasnya cuma satu: Buka halaman add-friend.blade.php
+    /**
+     * Menampilkan halaman Add Friend.
+     * Logika data (list teman, request, accept) diambil via API (JavaScript).
+     */
     public function index()
     {
         return view('add-friend');
