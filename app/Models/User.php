@@ -2,19 +2,24 @@
 
 namespace App\Models;
 
-// ... imports yang sudah ada ...
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Friendship; // <--- PASTIKAN ADA BARIS INI DI ATAS
+use App\Models\Friendship; // Pastikan baris ini tetap ada
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
+        'username', // <--- INI KUNCI PERBAIKANNYA (DITAMBAHKAN)
         'email',
         'password',
     ];
@@ -30,18 +35,16 @@ class User extends Authenticatable
     ];
 
     // ==========================================
-    // TAMBAHKAN KODE INI DI BAGIAN BAWAH
+    // RELASI FRIENDSHIP (JANGAN DIHAPUS)
     // ==========================================
 
     // Relasi 1: Teman yang SAYA ajak (Saya sebagai Sender)
-    // Controller memanggil ini dengan nama 'friendshipsTo'
     public function friendshipsTo()
     {
         return $this->hasMany(Friendship::class, 'user_id');
     }
 
     // Relasi 2: Teman yang MENG-AJAK saya (Saya sebagai Receiver)
-    // Controller memanggil ini dengan nama 'friendshipsOf' <--- INI PENYEBAB ERROR 500 KEMARIN
     public function friendshipsOf()
     {
         return $this->hasMany(Friendship::class, 'friend_id');
