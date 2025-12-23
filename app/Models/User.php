@@ -18,11 +18,11 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'username', // <--- INI KUNCI PERBAIKANNYA (DITAMBAHKAN)
-        'email',
-        'password',
-    ];
+    'name',
+    'username', // <--- Pastikan ini ada!
+    'email',
+    'password',
+];
 
     protected $hidden = [
         'password',
